@@ -1,0 +1,76 @@
+
+<div class="market-container">
+  <header class="market-header">
+    <h1>Оптовый рынок: Овощи и Фрукты</h1>
+    <div class="header-actions">
+      @if (authService.isLoggedIn()) {
+        <span class="user-info">
+          Привет, {{ authService.currentUser?.username }}!
+          @if (authService.isSeller()) {
+            <span class="role-badge seller">Продавец</span>
+          } @else {
+            <span class="role-badge buyer">Покупатель</span>
+          }
+        </span>
+        @if (authService.isSeller()) {
+          <a routerLink="/add" class="btn btn-success">+ Добавить товар</a>
+        }
+        <a routerLink="/profile" class="btn btn-outline">Профиль</a>
+        <button class="btn btn-outline" (click)="logout()">Выйти</button>
+      } @else {
+        <div class="auth-buttons">
+          <a routerLink="/login" class="btn btn-primary">Войти</a>
+          <a routerLink="/register" class="btn btn-secondary">Зарегистрироваться</a>
+        </div>
+      }
+    </div>
+  </header>
+
+  @if (productService.errorMessage()) {
+    <div class="error-msg">{{ productService.errorMessage() }}</div>
+  }
+
+  <div class="product-grid">
+    @for (item of products; track item.id) {
+      <div class="product-card">
+        <h3>{{ item.name }}</h3>
+        <p class="category">Категория ID: {{ item.category }}</p>
+        <p class="price">Цена: <strong>{{ item.price }} KZT</strong> / {{ item.unit }}</p>
+        <p>Мин. партия: {{ item.min_quantity }} {{ item.unit }}</p>
+        <p>В наличии: {{ item.stock_quantity }}</p>
+        <p *ngIf="item.seller_name">Продавец: <strong>{{ item.seller_name }}</strong></p>
+        <p *ngIf="item.seller_phone">Телефон продавца: <strong>{{ item.seller_phone }}</strong></p>
+
+        <div class="card-actions">
+          @if (item.id && paidOrders[item.id]) {
+            <button class="paid-btn" disabled>Оплачено</button>
+          } @else {
+            <button class="buy-btn" (click)="openPaymentModal(item)">Купить оптом</button>
+          }
+          @if (authService.isSeller() && item.owner === authService.currentUser?.id) {
+            <button class="del-btn" (click)="removeProduct(item.id!)">Удалить</button>
+          }
+        </div>
+      </div>
+    } @empty {
+      <p>Товаров пока нет. Будьте первым, кто выложит урожай!</p>
+    }
+  </div>
+
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button class="btn btn-outline" (click)="prevPage()" [disabled]="page <= 1">Назад</button>
+      <span class="page-info">Стр. {{ page }} из {{ totalPages }}</span>
+      <button class="btn btn-outline" (click)="nextPage()" [disabled]="page >= totalPages">Вперёд</button>
+    </div>
+  }
+</div>
+
+<!-- Payment Modal -->
+<app-payment-modal
+  [isVisible]="isPaymentModalVisible"
+  [product]="currentProduct"
+  [quantity]="currentQuantity"
+  (closeModal)="closePaymentModal()"
+  (confirmPayment)="submitOrder($event)">
+</app-payment-modal>
