@@ -1,0 +1,47 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="close()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Оплата через Kaspi QR</h3>
+      <button class="close-btn" (click)="close()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="product-info">
+        <h4>{{ product?.name }}</h4>
+        <div class="quantity-selector">
+          <label>Количество ({{ product?.unit }}):</label>
+          <div class="quantity-controls">
+            <button type="button" (click)="decreaseQuantity()" [disabled]="quantity <= (product?.min_quantity || 1)">-</button>
+            <input type="number" [(ngModel)]="quantity" (input)="onQuantityChange($event)" [min]="product?.min_quantity || 1" [max]="product?.stock_quantity || 9999">
+            <button type="button" (click)="increaseQuantity()" [disabled]="quantity >= (product?.stock_quantity || 9999)">+</button>
+          </div>
+          <p class="min-order">Мин. заказ: {{ product?.min_quantity }} {{ product?.unit }}</p>
+        </div>
+        <p class="total-price">Итого: {{ totalPrice }} KZT</p>
+      </div>
+
+      <div class="qr-section">
+        <p>Отсканируйте QR код в приложении Kaspi</p>
+        <div class="qr-container">
+          <canvas id="qrCanvas"></canvas>
+        </div>
+        <p class="qr-text">{{ qrText }}</p>
+      </div>
+
+      <div class="instructions">
+        <h5>Инструкция по оплате:</h5>
+        <ol>
+          <li>Откройте приложение Kaspi Bank</li>
+          <li>Нажмите "Сканировать QR"</li>
+          <li>Отсканируйте код выше</li>
+          <li>Подтвердите оплату</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="close()">Закрыть</button>
+      <button class="btn btn-success" (click)="onConfirmPayment()">Оплачено</button>
+    </div>
+  </div>
+</div>
