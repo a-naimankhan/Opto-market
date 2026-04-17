@@ -1,0 +1,46 @@
+<div class="store-page">
+	<header class="topbar">
+		<div class="brand">bigBasket</div>
+
+		<nav class="menu">
+			<div class="menu-item categories">
+				<button type="button" class="menu-btn">CATEGORIES</button>
+				<ul class="dropdown">
+					<li *ngFor="let category of categories">{{ category }}</li>
+				</ul>
+			</div>
+
+			<button type="button" class="menu-btn">PAGES</button>
+			<button type="button" class="menu-btn">CONTACT US</button>
+			<button type="button" class="icon-btn" aria-label="Search">S</button>
+			<button type="button" class="icon-btn" aria-label="Cart">C</button>
+			<button type="button" class="icon-btn" aria-label="Profile">U</button>
+		</nav>
+	</header>
+
+	<main class="content">
+		<section class="hero">
+			<h1>Bestseller Products</h1>
+			<p>Fresh products from trusted sellers for everyday shopping.</p>
+		</section>
+
+		<section class="cards-row">
+			<article class="product-card" *ngFor="let product of products">
+				<div *ngIf="product.image" class="product-image">
+					<img [src]="product.image" [alt]="product.name" />
+				</div>
+				<div *ngIf="!product.image" class="product-image placeholder">
+					📦
+				</div>
+				<div class="product-info">
+					<h3>{{ product.name }}</h3>
+					<p class="seller">Seller: {{ product.seller_name }}</p>
+					<div class="stars">★★★★☆</div>
+					<p class="price">${{ product.price }}</p>
+					<p class="stock">In Stock: {{ product.stock_quantity }}</p>
+					<button type="button">Add to cart</button>
+				</div>
+			</article>
+		</section>
+	</main>
+</div>
