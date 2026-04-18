@@ -1,13 +1,16 @@
-from django.db import IntegrityError
+from datetime import datetime
+from django.db import IntegrityError, transaction
+from django.db.models import Avg, Count
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.utils import timezone
 from rest_framework.decorators import APIView, api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
-from .serializers import CategorySerializer, ProductSerializer, OrderSerializer
-from .models import UserProfile, Product, Category, Order
+from .serializers import CategorySerializer, ProductSerializer, OrderSerializer, ProductReviewSerializer
+from .models import UserProfile, Product, Category, Order, OrderStatusHistory, ProductReview
 
 # Регистрация пользователя
 @api_view(['POST'])
@@ -44,7 +47,15 @@ def user_profile(request):
             'role': profile.role
         })
     except UserProfile.DoesNotExist:
-        return Response({'error': 'Профиль не найден'}, status=status.HTTP_404_NOT_FOUND)
+        # Backward compatibility: some legacy users may not have a profile row yet.
+        fallback_role = 'seller' if (user.is_staff or user.is_superuser) else 'buyer'
+        profile = UserProfile.objects.create(user=user, role=fallback_role)
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'role': profile.role
+        })
 from rest_framework.permissions import IsAuthenticated
 
 # 1. CBV для списка и создания (Full CRUD)
@@ -57,7 +68,17 @@ class ProductList(APIView):
          
     def get(self, request):
         # Показываем доступные товары всем пользователям
-        products = Product.available.all().order_by('-id')
+        products = Product.available.annotate(
+            avg_rating=Avg('reviews__rating'),
+            reviews_count=Count('reviews', distinct=True),
+        ).order_by('-id')
+
+        category_id = request.query_params.get('category')
+        if category_id:
+            try:
+                products = products.filter(category_id=int(category_id))
+            except (TypeError, ValueError):
+                pass
 
         paginator = PageNumberPagination()
         # defaults
@@ -81,13 +102,7 @@ class ProductList(APIView):
         except UserProfile.DoesNotExist:
             return Response({'error': 'Профиль не найден'}, status=400)
 
-        # Поддерживаем передачу категории по id или по названию
         category_id = request.data.get('category')
-        category_name = request.data.get('category_name')
-
-        if category_name:
-            category_obj, _ = Category.objects.get_or_create(name=category_name.strip())
-            category_id = category_obj.id
 
         if not category_id:
             return Response({'category': ['Категория обязательна']}, status=400)
@@ -99,9 +114,6 @@ class ProductList(APIView):
 
         payload = request.data.copy()
         payload['category'] = category_obj.id
-        # удаляем поле category_name, чтобы сериализатор не ругался
-        if 'category_name' in payload:
-            payload.pop('category_name')
 
         serializer = ProductSerializer(data=payload)
         if serializer.is_valid():
@@ -117,69 +129,259 @@ class CategoryList(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        categories = Category.objects.all()
+        categories = Category.objects.order_by('id')
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
+
+
+class ProductReviewList(APIView):
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get(self, request, product_id):
+        reviews = ProductReview.objects.filter(product_id=product_id).select_related('user')
+        serializer = ProductReviewSerializer(reviews, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, product_id):
+        try:
+            product = Product.objects.get(pk=product_id)
+        except Product.DoesNotExist:
+            return Response({'error': 'Товар не найден'}, status=404)
+
+        try:
+            profile = UserProfile.objects.get(user=request.user)
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'Профиль не найден'}, status=404)
+
+        if profile.role != 'buyer':
+            return Response({'error': 'Только покупатель может оставлять отзывы'}, status=403)
+
+        has_order = Order.objects.filter(customer=request.user, product_id=product_id).exists()
+        if not has_order:
+            return Response({'error': 'Можно оставить отзыв только на товар из ваших заказов'}, status=403)
+
+        rating = request.data.get('rating')
+        comment = (request.data.get('comment') or '').strip()
+
+        try:
+            rating = int(rating)
+        except (TypeError, ValueError):
+            return Response({'error': 'rating должен быть числом от 1 до 5'}, status=400)
+
+        if rating < 1 or rating > 5:
+            return Response({'error': 'rating должен быть в диапазоне 1..5'}, status=400)
+
+        review, _ = ProductReview.objects.update_or_create(
+            product=product,
+            user=request.user,
+            defaults={
+                'rating': rating,
+                'comment': comment,
+            },
+        )
+
+        serializer = ProductReviewSerializer(review)
+        return Response(serializer.data, status=201)
 
 # 1.6 CBV для заказов
 class OrderList(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        orders = Order.objects.filter(customer=request.user).order_by('-created_at')
+        role = self._get_role(request.user)
+        orders = Order.objects.all()
+
+        if role == 'seller':
+            orders = orders.filter(product__owner=request.user)
+        else:
+            orders = orders.filter(customer=request.user)
+
+        date_from = request.query_params.get('date_from')
+        date_to = request.query_params.get('date_to')
+        status_filter = request.query_params.get('status')
+
+        if date_from:
+            parsed_from = self._parse_date(date_from)
+            if parsed_from:
+                orders = orders.filter(created_at__date__gte=parsed_from)
+
+        if date_to:
+            parsed_to = self._parse_date(date_to)
+            if parsed_to:
+                orders = orders.filter(created_at__date__lte=parsed_to)
+
+        if status_filter:
+            orders = orders.filter(status=status_filter)
+
+        orders = orders.select_related('product', 'customer').order_by('-created_at')
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        print("Order POST received:", request.data)  # Логирование
-        product_id = request.data.get('product')
-        quantity = int(request.data.get('quantity', 1))
+        role = self._get_role(request.user)
+        if role != 'buyer':
+            return Response({'error': 'Только покупатель может оформить заказ'}, status=403)
 
-        if not product_id:
-            print("No product_id provided")
-            return Response({'product': ['Товар обязателен']}, status=400)
+        items = request.data.get('items') or []
+        if not isinstance(items, list) or not items:
+            return Response({'items': ['Корзина пуста']}, status=400)
 
+        customer_first_name = request.data.get('customer_first_name', '').strip()
+        customer_last_name = request.data.get('customer_last_name', '').strip()
+        customer_phone = request.data.get('customer_phone', '').strip()
+        customer_email = request.data.get('customer_email', '').strip()
+
+        has_other_recipient = bool(request.data.get('has_other_recipient', False))
+        recipient_first_name = request.data.get('recipient_first_name', '').strip()
+        recipient_last_name = request.data.get('recipient_last_name', '').strip()
+        recipient_phone = request.data.get('recipient_phone', '').strip()
+        recipient_email = request.data.get('recipient_email', '').strip()
+
+        delivery_method = request.data.get('delivery_method', Order.DELIVERY_PICKUP)
+        payment_method = request.data.get('payment_method', Order.PAYMENT_CASH)
+
+        if not all([customer_first_name, customer_last_name, customer_phone, customer_email]):
+            return Response({'error': 'Заполните контактные данные покупателя'}, status=400)
+
+        if has_other_recipient and not all([recipient_first_name, recipient_last_name, recipient_phone, recipient_email]):
+            return Response({'error': 'Заполните данные получателя'}, status=400)
+
+        if delivery_method not in {Order.DELIVERY_PICKUP, Order.DELIVERY_OTHER_CITY}:
+            return Response({'error': 'Некорректный способ доставки'}, status=400)
+
+        if payment_method not in {Order.PAYMENT_CASH, Order.PAYMENT_NON_CASH}:
+            return Response({'error': 'Некорректный способ оплаты'}, status=400)
+
+        products_to_update = []
+        prepared_items = []
+
+        for item in items:
+            product_id = item.get('product_id')
+            quantity = int(item.get('quantity', 1))
+
+            if not product_id:
+                return Response({'error': 'product_id обязателен для каждого товара'}, status=400)
+
+            try:
+                product = Product.objects.select_for_update().get(pk=product_id)
+            except Product.DoesNotExist:
+                return Response({'error': f'Товар #{product_id} не найден'}, status=404)
+
+            if quantity < 1:
+                return Response({'error': f'Некорректное количество для товара {product.name}'}, status=400)
+
+            if quantity > product.stock_quantity:
+                return Response({'error': f'Недостаточно остатка для товара {product.name}'}, status=400)
+
+            prepared_items.append((product, quantity))
+            products_to_update.append((product, quantity))
+
+        now = timezone.now()
+        order_group = f"ORD{now.strftime('%Y%m%d%H%M%S')}{request.user.id}"
+        created_orders = []
+
+        with transaction.atomic():
+            for index, (product, quantity) in enumerate(prepared_items, start=1):
+                total_price = product.price * quantity
+                order = Order.objects.create(
+                    customer=request.user,
+                    product=product,
+                    quantity=quantity,
+                    total_price=total_price,
+                    status=Order.STATUS_ACCEPTED,
+                    order_group=order_group,
+                    order_number=f"{order_group}-{index}",
+                    customer_first_name=customer_first_name,
+                    customer_last_name=customer_last_name,
+                    customer_phone=customer_phone,
+                    customer_email=customer_email,
+                    has_other_recipient=has_other_recipient,
+                    recipient_first_name=recipient_first_name,
+                    recipient_last_name=recipient_last_name,
+                    recipient_phone=recipient_phone,
+                    recipient_email=recipient_email,
+                    delivery_method=delivery_method,
+                    payment_method=payment_method,
+                    buyer_name=f"{customer_first_name} {customer_last_name}".strip(),
+                    buyer_phone=customer_phone,
+                )
+                created_orders.append(order)
+                OrderStatusHistory.objects.create(
+                    order=order,
+                    previous_status='',
+                    new_status=Order.STATUS_ACCEPTED,
+                    changed_by=request.user,
+                )
+
+            for product, quantity in products_to_update:
+                product.stock_quantity -= quantity
+                product.save(update_fields=['stock_quantity'])
+
+        serializer = OrderSerializer(created_orders, many=True)
+        return Response(serializer.data, status=201)
+
+    @staticmethod
+    def _parse_date(raw_value):
         try:
-            product = Product.objects.get(pk=product_id)
-            print(f"Product found: {product.name}")
-        except Product.DoesNotExist:
-            print(f"Product {product_id} not found")
-            return Response({'product': ['Товар не найден']}, status=404)
+            return datetime.strptime(raw_value, '%Y-%m-%d').date()
+        except (TypeError, ValueError):
+            return None
 
-        if quantity < 1 or quantity > product.stock_quantity:
-            print(f"Invalid quantity: {quantity}, stock: {product.stock_quantity}")
-            return Response({'quantity': ['Недопустимое количество']}, status=400)
+    @staticmethod
+    def _get_role(user):
+        try:
+            return UserProfile.objects.get(user=user).role
+        except UserProfile.DoesNotExist:
+            return 'buyer'
 
-        total_price = product.price * quantity
-        print(f"Creating order: customer={request.user}, product={product}, quantity={quantity}, total={total_price}")
 
-        # Get buyer profile for contact info
-        buyer_name = ''
-        buyer_phone = ''
+class OrderStatusUpdate(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
         try:
             profile = UserProfile.objects.get(user=request.user)
-            buyer_name = request.user.username  # or profile.name if exists
-            # buyer_phone can be added to UserProfile if needed
         except UserProfile.DoesNotExist:
-            buyer_name = request.user.username
+            return Response({'error': 'Профиль пользователя не найден'}, status=404)
 
-        order = Order.objects.create(
-            customer=request.user,
-            product=product,
-            quantity=quantity,
-            total_price=total_price,
-            status='Paid',
-            order_number=f"ORD{request.user.id}{product.id}{int(product.stock_quantity)}{Order.objects.count()+1}",
-            buyer_name=buyer_name,
-            buyer_phone=buyer_phone
-        )
+        if profile.role != 'seller':
+            return Response({'error': 'Только продавец может менять статус заказа'}, status=403)
 
-        product.stock_quantity = product.stock_quantity - quantity
-        product.save()
-        print(f"Order created: {order.order_number}, stock updated to {product.stock_quantity}")
+        try:
+            order = Order.objects.select_related('product').get(pk=pk)
+        except Order.DoesNotExist:
+            return Response({'error': 'Заказ не найден'}, status=404)
+
+        if order.product.owner_id != request.user.id:
+            return Response({'error': 'Нельзя менять статус чужого заказа'}, status=403)
+
+        new_status = request.data.get('status')
+        allowed_statuses = {
+            Order.STATUS_PENDING_PAYMENT,
+            Order.STATUS_PAID,
+            Order.STATUS_DELIVERED,
+        }
+
+        if new_status not in allowed_statuses:
+            return Response({'error': 'Недопустимый статус заказа'}, status=400)
+
+        previous_status = order.status
+        order.status = new_status
+
+        with transaction.atomic():
+            order.save(update_fields=['status'])
+            OrderStatusHistory.objects.create(
+                order=order,
+                previous_status=previous_status,
+                new_status=new_status,
+                changed_by=request.user,
+            )
 
         serializer = OrderSerializer(order)
-        return Response(serializer.data, status=201)
+        return Response(serializer.data, status=200)
 
 # 2. CBV для удаления/обновления
 class ProductDetail(APIView):

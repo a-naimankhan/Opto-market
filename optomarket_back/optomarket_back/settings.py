@@ -139,3 +139,6 @@ STATIC_URL = "static/"
 # Media uploads (verification files)
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# Keep legacy integer primary keys for models without explicit PK fields.
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
