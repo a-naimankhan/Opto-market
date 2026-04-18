@@ -1,1 +1,51 @@
-<p>order works!</p>
+<section class="seller-orders">
+	<header>
+		<h2>Мои заказы</h2>
+		<p>После поступления заказа свяжитесь с покупателем для подтверждения условий оплаты и доставки.</p>
+	</header>
+
+	<div class="filters">
+		<label>
+			Дата от
+			<input type="date" [(ngModel)]="dateFrom" />
+		</label>
+		<label>
+			Дата до
+			<input type="date" [(ngModel)]="dateTo" />
+		</label>
+		<button type="button" (click)="loadOrders()">Применить фильтр</button>
+	</div>
+
+	<p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+	<p *ngIf="isLoading">Загрузка...</p>
+
+	<div class="orders-list" *ngIf="!isLoading && orders.length">
+		<article class="order-card" *ngFor="let order of orders">
+			<div>
+				<h3>{{ order.product.name }}</h3>
+				<p>Номер заказа: {{ order.order_number }}</p>
+				<p>Дата: {{ order.created_at | date: 'dd.MM.yyyy HH:mm' }}</p>
+				<p>Покупатель: {{ order.customer_first_name }} {{ order.customer_last_name }}</p>
+				<p>Телефон: {{ order.customer_phone }}</p>
+				<p>Email: {{ order.customer_email }}</p>
+			</div>
+
+			<div>
+				<p>Количество: {{ order.quantity }}</p>
+				<p>Сумма: {{ order.total_price | number: '1.2-2' }}</p>
+				<p>Доставка: {{ order.delivery_method === 'pickup' ? 'Самовывоз' : 'Доставка в другой город' }}</p>
+				<p>Оплата: {{ order.payment_method === 'cash' ? 'Наличный расчет' : 'Безналичный расчет' }}</p>
+				<p>Текущий статус: <strong>{{ statusLabel(order.status) }}</strong></p>
+
+				<div class="status-row">
+					<select [(ngModel)]="draftStatuses[order.id]">
+						<option *ngFor="let status of sellerStatuses" [value]="status">{{ statusLabel(status) }}</option>
+					</select>
+					<button type="button" (click)="saveStatus(order)">Сохранить статус</button>
+				</div>
+			</div>
+		</article>
+	</div>
+
+	<p *ngIf="!isLoading && !orders.length">Заказов пока нет.</p>
+</section>

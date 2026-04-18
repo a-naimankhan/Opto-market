@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component,OnInit  } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { ProductService } from '../../../services/product/product';
@@ -13,13 +13,17 @@ import { Category, Product } from '../../../models/api.models';
   templateUrl: './products.html',
   styleUrl: './products.css',
 })
-export class Products implements OnInit {
+export class Products implements OnInit, OnDestroy {
+
+  private refreshTimerId: ReturnType<typeof setInterval> | null = null;
 
 
   
 
   
   isSidePanelVisible: boolean = false; 
+  isProductsLoaded: boolean = false;
+  productsLoadError: string | null = null;
   productObj: Partial<Product> = {
     name: '',
     category: 0,
@@ -38,15 +42,28 @@ export class Products implements OnInit {
   ngOnInit(): void {
     this.getProducts();
     this.getAllCategory();
+    this.refreshTimerId = setInterval(() => this.getProducts(), 30000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshTimerId) {
+      clearInterval(this.refreshTimerId);
+      this.refreshTimerId = null;
+    }
   }
 
   getProducts() {
-    this.productSrv.getAllProduct().subscribe({
+    this.isProductsLoaded = false;
+    this.productsLoadError = null;
+    this.productSrv.getAllProduct(null, 48).subscribe({
       next: (res) => {
         this.productsList = res.results ?? [];
+        this.isProductsLoaded = true;
       },
       error: () => {
         this.productsList = [];
+        this.productsLoadError = 'Не удалось загрузить список товаров. Проверьте, что backend запущен.';
+        this.isProductsLoaded = true;
       },
     });
   }

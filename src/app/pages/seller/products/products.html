@@ -4,16 +4,24 @@
             <div class="card-header bg-primary">
                 <div class="row">
                     <div class="col-6">
-                        Список товаров
+                        Актуальные товары всех пользователей
                     </div>
                     <div class="col-6 text-end">
-                        <button class="btn btn-sm btn-success" (click)="openSidePanel()">Добавить товар</button>
+                        <button class="btn btn-sm btn-success" (click)="openSidePanel()">Добавить товары</button>
                     </div>
                 </div>
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-12 text-center py-4" *ngIf="!productsList.length">
+                    <div class="col-12 text-center py-4" *ngIf="!isProductsLoaded && !productsList.length">
+                        Загрузка товаров...
+                    </div>
+
+                    <div class="col-12 text-center py-4 text-danger" *ngIf="isProductsLoaded && productsLoadError">
+                        {{ productsLoadError }}
+                    </div>
+
+                    <div class="col-12 text-center py-4" *ngIf="isProductsLoaded && !productsLoadError && !productsList.length">
                         Пока нет товаров. Добавьте первый товар.
                     </div>
 

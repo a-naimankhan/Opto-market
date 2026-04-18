@@ -7,11 +7,22 @@ import { Category, Product, ProductListResponse } from '../../models/api.models'
   providedIn: 'root',
 })
 export class ProductService {
-
   constructor(private http: HttpClient) { }
 
-  getAllProduct() {
-    return this.http.get<ProductListResponse>(Constant.API_END_POINT + Constant.METHODS.GET_ALL_PRODUCT);
+  getAllProduct(categoryId?: number | null, pageSize?: number) {
+    const query: string[] = [];
+    if (categoryId) {
+      query.push(`category=${categoryId}`);
+    }
+    if (pageSize && pageSize > 0) {
+      query.push(`page_size=${pageSize}`);
+    }
+
+    let url = Constant.API_END_POINT + Constant.METHODS.GET_ALL_PRODUCT;
+    if (query.length) {
+      url += `?${query.join('&')}`;
+    }
+    return this.http.get<ProductListResponse>(url);
   }
 
  

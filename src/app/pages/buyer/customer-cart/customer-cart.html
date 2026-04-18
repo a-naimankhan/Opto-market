@@ -1,1 +1,41 @@
-<p>customer-cart works!</p>
+<section class="cart-page">
+	<header class="cart-page-header">
+		<h2>Корзина покупателя</h2>
+		<a routerLink="/buyer" class="back-link">Вернуться к товарам</a>
+	</header>
+
+	<div *ngIf="cartItems.length; else emptyState" class="cart-grid">
+		<article class="cart-line" *ngFor="let item of cartItems; trackBy: trackByProductId">
+			<div>
+				<h3>{{ item.product.name }}</h3>
+				<p>{{ item.product.price }} x {{ item.quantity }}</p>
+			</div>
+
+			<div class="line-controls">
+				<button type="button" (click)="decrease(item.product.id)">-</button>
+				<span>{{ item.quantity }}</span>
+				<button type="button" (click)="increase(item.product.id)">+</button>
+			</div>
+
+			<strong>{{ item.product.price * item.quantity | number: '1.2-2' }}</strong>
+
+			<button type="button" class="remove-btn" (click)="remove(item.product.id)">Удалить</button>
+		</article>
+
+		<footer class="cart-summary">
+			<p>К оплате: <strong>{{ subtotal | number: '1.2-2' }}</strong></p>
+			<small>Без учета доставки</small>
+			<div class="actions">
+				<button type="button" class="reset" (click)="clear()">Очистить корзину</button>
+				<a routerLink="/buyer/checkout" class="checkout-link">Оформить заказ</a>
+			</div>
+		</footer>
+	</div>
+
+	<ng-template #emptyState>
+		<div class="empty-state">
+			Корзина пока пуста.
+			<a routerLink="/buyer" class="back-link">Перейти к товарам</a>
+		</div>
+	</ng-template>
+</section>

@@ -1,9 +1,157 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { OrderItem, OrderStatus, ProductReview } from '../../../models/api.models';
+import { OrderService } from '../../../services/order/order';
+import { AuthService } from '../../../services/auth/auth';
 
 @Component({
   selector: 'app-customer-orders',
-  imports: [],
+  imports: [CommonModule, FormsModule],
   templateUrl: './customer-orders.html',
   styleUrl: './customer-orders.css',
 })
-export class CustomerOrders {}
+export class CustomerOrders implements OnInit {
+  orders: OrderItem[] = [];
+  reviewDrafts: Record<number, { rating: number; comment: string }> = {};
+  reviewErrors: Record<number, string> = {};
+  reviewSuccess: Record<number, string> = {};
+  submittingReviews: Record<number, boolean> = {};
+  dateFrom = '';
+  dateTo = '';
+  statusFilter: OrderStatus | '' = '';
+  isLoading = false;
+  errorMessage = '';
+  private currentUserId: number | null = null;
+
+  readonly statuses: OrderStatus[] = ['accepted', 'pending_payment', 'paid', 'delivered'];
+
+  constructor(private orderService: OrderService, private authService: AuthService) {}
+
+  ngOnInit(): void {
+    this.currentUserId = this.authService.currentUser?.id ?? null;
+    if (!this.currentUserId && this.authService.getToken()) {
+      this.authService.loadUserProfile().subscribe((user) => {
+        this.currentUserId = user?.id ?? null;
+      });
+    }
+    this.loadOrders();
+  }
+
+  loadOrders(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.orderService
+      .getOrders({
+        dateFrom: this.dateFrom || undefined,
+        dateTo: this.dateTo || undefined,
+        status: this.statusFilter || undefined,
+      })
+      .subscribe({
+        next: (orders) => {
+          this.orders = orders;
+          this.isLoading = false;
+          this.initializeReviewDrafts();
+          this.loadExistingReviews();
+        },
+        error: () => {
+          this.errorMessage = 'Не удалось загрузить историю заказов.';
+          this.isLoading = false;
+          this.orders = [];
+        },
+      });
+  }
+
+  submitReview(order: OrderItem): void {
+    const draft = this.reviewDrafts[order.id];
+    if (!draft) {
+      return;
+    }
+
+    this.reviewErrors[order.id] = '';
+    this.reviewSuccess[order.id] = '';
+
+    const rating = Number(draft.rating);
+    if (!Number.isFinite(rating) || rating < 1 || rating > 5) {
+      this.reviewErrors[order.id] = 'Оценка должна быть от 1 до 5.';
+      return;
+    }
+
+    this.submittingReviews[order.id] = true;
+    this.orderService
+      .submitProductReview(order.product.id, {
+        rating,
+        comment: draft.comment ?? '',
+      })
+      .subscribe({
+        next: () => {
+          this.reviewSuccess[order.id] = 'Отзыв сохранен.';
+          this.submittingReviews[order.id] = false;
+        },
+        error: (error: { error?: { error?: string } }) => {
+          this.reviewErrors[order.id] = error?.error?.error ?? 'Не удалось сохранить отзыв.';
+          this.submittingReviews[order.id] = false;
+        },
+      });
+  }
+
+  private initializeReviewDrafts(): void {
+    for (const order of this.orders) {
+      if (!this.reviewDrafts[order.id]) {
+        this.reviewDrafts[order.id] = {
+          rating: 5,
+          comment: '',
+        };
+      }
+    }
+  }
+
+  private loadExistingReviews(): void {
+    if (!this.currentUserId) {
+      return;
+    }
+
+    const uniqueProductIds = [...new Set(this.orders.map((order) => order.product.id))];
+
+    for (const productId of uniqueProductIds) {
+      this.orderService.getProductReviews(productId).subscribe({
+        next: (reviews) => {
+          this.applyReviewToOrders(productId, reviews);
+        },
+      });
+    }
+  }
+
+  private applyReviewToOrders(productId: number, reviews: ProductReview[]): void {
+    if (!this.currentUserId) {
+      return;
+    }
+
+    const myReview = reviews.find((review) => review.user === this.currentUserId);
+    if (!myReview) {
+      return;
+    }
+
+    const relatedOrders = this.orders.filter((order) => order.product.id === productId);
+    for (const order of relatedOrders) {
+      this.reviewDrafts[order.id] = {
+        rating: myReview.rating,
+        comment: myReview.comment,
+      };
+    }
+  }
+
+  statusLabel(status: OrderStatus): string {
+    if (status === 'accepted') {
+      return 'Заказ принят';
+    }
+    if (status === 'pending_payment') {
+      return 'Ожидает оплаты';
+    }
+    if (status === 'paid') {
+      return 'Оплачено';
+    }
+    return 'Доставлено';
+  }
+}

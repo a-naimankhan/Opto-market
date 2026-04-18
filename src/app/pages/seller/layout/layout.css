@@ -2,19 +2,19 @@
 .seller-shell {
   display: flex;
   min-height: 100vh;
-  background: #f0f2f5;
-  font-family: 'Segoe UI', sans-serif;
+  background: #f4f4f4;
+  font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
 }
 
 /* === Sidebar === */
 .sidebar {
   width: 240px;
   min-width: 240px;
-  background: #1a1d23;
+  background: #6eb30b;
   display: flex;
   flex-direction: column;
   padding: 24px 0;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.18);
 }
 
 .sidebar-brand {
@@ -22,7 +22,7 @@
   align-items: center;
   gap: 10px;
   padding: 0 24px 28px;
-  border-bottom: 1px solid #2e3340;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .brand-icon {
@@ -49,7 +49,7 @@
   align-items: center;
   gap: 12px;
   padding: 13px 24px;
-  color: #9aa0b0;
+  color: #ecffd1;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -58,14 +58,14 @@
 }
 
 .nav-item:hover {
-  background: #252930;
+  background: rgba(255, 255, 255, 0.16);
   color: #ffffff;
 }
 
 .nav-item.active {
-  background: #252930;
-  color: #4f8ef7;
-  border-left-color: #4f8ef7;
+  background: #ffffff;
+  color: #4a7c10;
+  border-left-color: #4a7c10;
 }
 
 .nav-icon {
@@ -82,9 +82,9 @@
   margin: 16px 20px 0;
   padding: 11px 16px;
   background: transparent;
-  border: 1px solid #3a3f4b;
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 8px;
-  color: #9aa0b0;
+  color: #f4ffe2;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -92,9 +92,9 @@
 }
 
 .logout-btn:hover {
-  background: #e74c3c;
-  border-color: #e74c3c;
-  color: #fff;
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #4a7c10;
 }
 
 /* === Main Area === */
@@ -107,9 +107,9 @@
 
 /* === Topbar === */
 .topbar {
-  background: #ffffff;
+  background: #7ac70c;
   padding: 16px 32px;
-  border-bottom: 1px solid #e2e6ea;
+  border-bottom: 1px solid #69ae09;
   display: flex;
   align-items: center;
 }
@@ -117,7 +117,7 @@
 .page-title {
   font-size: 20px;
   font-weight: 600;
-  color: #1a1d23;
+  color: #ffffff;
   margin: 0;
 }
 

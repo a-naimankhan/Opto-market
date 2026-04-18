@@ -14,6 +14,6 @@ export class Layout {
 
   logout(): void {
     this.authService.logout();
-    this.router.navigateByUrl('/login');
+    this.router.navigate(['/login'], { queryParams: { redirect: '/buyer' } });
   }
 }

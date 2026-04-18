@@ -1,31 +1,75 @@
 <div class="store-page">
 	<header class="topbar">
-		<div class="brand">bigBasket</div>
+		<div class="brand">OptoMarket</div>
 
 		<nav class="menu">
 			<div class="menu-item categories">
-				<button type="button" class="menu-btn">CATEGORIES</button>
+				<button type="button" class="menu-btn">КАТЕГОРИИ</button>
 				<ul class="dropdown">
-					<li *ngFor="let category of categories">{{ category }}</li>
+					<li
+						*ngFor="let category of categories"
+						(click)="filterByCategory(category.id)"
+						[class.active-cat]="selectedCategoryId === category.id"
+					>{{ category.name }}</li>
 				</ul>
 			</div>
 
 			<button type="button" class="menu-btn">PAGES</button>
 			<button type="button" class="menu-btn">CONTACT US</button>
 			<button type="button" class="icon-btn" aria-label="Search">S</button>
-			<button type="button" class="icon-btn" aria-label="Cart">C</button>
-			<button type="button" class="icon-btn" aria-label="Profile">U</button>
+			<button type="button" class="icon-btn cart-btn" aria-label="Cart" (click)="openCartSidebar()">
+				C
+				<span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
+			</button>
+			<div class="menu-item profile-menu">
+				<button type="button" class="icon-btn" aria-label="Profile" (click)="toggleProfilePanel()">U</button>
+				<div class="profile-dropdown" *ngIf="isProfileOpen">
+					<div *ngIf="currentUser; else guestProfile" class="profile-content">
+						<p><strong>{{ currentUser.username }}</strong></p>
+						<p>{{ currentUser.email }}</p>
+						<p>Роль: {{ currentUser.role }}</p>
+						<button type="button" class="profile-action" (click)="goToOrders()">Мои заказы</button>
+						<button type="button" class="profile-action danger" (click)="logout()">Выйти</button>
+					</div>
+					<ng-template #guestProfile>
+						<div class="profile-content">
+							<p>Вы не авторизованы</p>
+							<button type="button" class="profile-action" (click)="goToLogin()">Войти</button>
+						</div>
+					</ng-template>
+				</div>
+			</div>
+			<button type="button" class="menu-btn login-btn" *ngIf="!currentUser" (click)="goToLogin()">Войти</button>
 		</nav>
 	</header>
 
 	<main class="content">
 		<section class="hero">
-			<h1>Bestseller Products</h1>
-			<p>Fresh products from trusted sellers for everyday shopping.</p>
+			<h1>Лучшие товары</h1>
+			<p>Свежие товары от проверенных продавцов для ежедневных покупок.</p>
+			<div class="search-wrap">
+				<input type="text" [(ngModel)]="searchQuery" placeholder="Поиск по названию, продавцу, категории" />
+			</div>
 		</section>
 
-		<section class="cards-row">
-			<article class="product-card" *ngFor="let product of products">
+		<section class="filter-strip">
+			<button
+				type="button"
+				class="filter-btn"
+				[class.active]="selectedCategoryId === null"
+				(click)="filterByCategory(null)"
+			>Все товары</button>
+			<button
+				type="button"
+				class="filter-btn"
+				*ngFor="let cat of categories"
+				[class.active]="selectedCategoryId === cat.id"
+				(click)="filterByCategory(cat.id)"
+			>{{ cat.name }}</button>
+		</section>
+
+		<section class="cards-row" *ngIf="filteredProducts.length; else noProducts">
+			<article class="product-card" *ngFor="let product of filteredProducts">
 				<div *ngIf="product.image" class="product-image">
 					<img [src]="product.image" [alt]="product.name" />
 				</div>
@@ -34,13 +78,62 @@
 				</div>
 				<div class="product-info">
 					<h3>{{ product.name }}</h3>
-					<p class="seller">Seller: {{ product.seller_name }}</p>
-					<div class="stars">★★★★☆</div>
+					<p class="seller">Продавец: {{ product.seller_name }}</p>
+					<div class="stars" [attr.aria-label]="'Рейтинг ' + (getAverageRating(product) | number: '1.1-1')">
+						<span
+							*ngFor="let star of starScale"
+							class="star"
+							[class.filled]="star <= getRoundedRating(product)"
+						>★</span>
+						<span class="rating-value">{{ getAverageRating(product) | number: '1.1-1' }}</span>
+						<span class="rating-count">({{ getReviewsCount(product) }})</span>
+					</div>
 					<p class="price">${{ product.price }}</p>
-					<p class="stock">In Stock: {{ product.stock_quantity }}</p>
-					<button type="button">Add to cart</button>
+					<p class="stock">В наличии: {{ product.stock_quantity }}</p>
+					<button type="button" (click)="addToCart(product)">В корзину</button>
 				</div>
 			</article>
 		</section>
+		<ng-template #noProducts>
+			<p class="no-products">По вашему запросу товары не найдены.</p>
+		</ng-template>
 	</main>
+
+	<div class="cart-overlay" *ngIf="isCartSidebarOpen" (click)="closeCartSidebar()"></div>
+	<aside class="cart-sidebar" [class.open]="isCartSidebarOpen" aria-label="Мини-корзина">
+		<div class="cart-header">
+			<h3>Корзина</h3>
+			<button type="button" class="close-btn" (click)="closeCartSidebar()">x</button>
+		</div>
+
+		<div class="cart-body" *ngIf="cartItems.length; else emptyCart">
+			<div class="cart-item" *ngFor="let item of cartItems; trackBy: trackByProductId">
+				<div class="cart-item-main">
+					<p class="cart-name">{{ item.product.name }}</p>
+					<p class="cart-meta">{{ item.product.price }} x {{ item.quantity }}</p>
+				</div>
+				<div class="qty-controls">
+					<button type="button" (click)="decreaseQuantity(item.product.id)">-</button>
+					<span>{{ item.quantity }}</span>
+					<button type="button" (click)="increaseQuantity(item.product.id)">+</button>
+				</div>
+				<button type="button" class="remove-btn" (click)="removeFromCart(item.product.id)">Удалить</button>
+			</div>
+		</div>
+
+		<ng-template #emptyCart>
+			<div class="empty-cart">Корзина пуста</div>
+		</ng-template>
+
+		<div class="cart-footer">
+			<div class="cart-total-row">
+				<span>К оплате</span>
+				<strong>{{ getCartTotal() | number: '1.2-2' }}</strong>
+			</div>
+			<p class="delivery-note">Без учета доставки</p>
+			<button type="button" class="checkout-btn" [disabled]="!cartItems.length" (click)="goToCheckout()">
+				Оформить заказ
+			</button>
+		</div>
+	</aside>
 </div>

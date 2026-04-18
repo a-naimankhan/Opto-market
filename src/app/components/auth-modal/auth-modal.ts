@@ -1,18 +1,19 @@
-
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '../../../services/auth/auth';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth/auth';
+import { AuthModalService } from '../../services/auth-modal/auth-modal';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-auth-modal',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './login.html',
-  styleUrl: './login.css',
+  templateUrl: './auth-modal.html',
+  styleUrl: './auth-modal.css',
 })
-export class Login {
+export class AuthModal {
+  isOpen = false;
   isRegister = false;
 
   loginObj = {
@@ -28,7 +29,19 @@ export class Login {
     role: 'buyer' as 'buyer' | 'seller',
   };
 
-  constructor(private router: Router, private route: ActivatedRoute, private authService: AuthService) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private authModalService: AuthModalService
+  ) {
+    this.authModalService.state$.subscribe((state) => {
+      this.isOpen = state.isOpen;
+    });
+  }
+
+  close(): void {
+    this.authModalService.close();
+  }
 
   onLogin(): void {
     this.authService.login(this.loginObj).subscribe({
@@ -40,7 +53,8 @@ export class Login {
             return;
           }
 
-          const redirectTarget = this.route.snapshot.queryParamMap.get('redirect');
+          const redirectTarget = this.authModalService.redirectUrl;
+          this.close();
 
           if (user.role === 'seller') {
             this.router.navigateByUrl('/seller/products');

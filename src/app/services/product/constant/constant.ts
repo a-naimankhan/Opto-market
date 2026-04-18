@@ -6,7 +6,8 @@ export const Constant = {
         CREATE_PRODUCT: 'products/',
         LOGIN: 'token/',
         REGISTER: 'register/',
-        USER_PROFILE: 'user/profile/'
+        USER_PROFILE: 'user/profile/',
+        ORDERS: 'orders/'
         
     }
 }
