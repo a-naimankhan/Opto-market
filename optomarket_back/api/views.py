@@ -1,6 +1,6 @@
 from datetime import datetime
 from django.db import IntegrityError, transaction
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Q
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.utils import timezone
@@ -47,8 +47,9 @@ def user_profile(request):
             'role': profile.role
         })
     except UserProfile.DoesNotExist:
-        # Backward compatibility: some legacy users may not have a profile row yet.
-        fallback_role = 'seller' if (user.is_staff or user.is_superuser) else 'buyer'
+        # Backward compatibility: infer seller role from owned products as well.
+        owns_products = Product.objects.filter(owner=user).exists()
+        fallback_role = 'seller' if (user.is_staff or user.is_superuser or owns_products) else 'buyer'
         profile = UserProfile.objects.create(user=user, role=fallback_role)
         return Response({
             'id': user.id,
@@ -214,7 +215,8 @@ class OrderList(APIView):
                 orders = orders.filter(created_at__date__lte=parsed_to)
 
         if status_filter:
-            orders = orders.filter(status=status_filter)
+            normalized_status = self._normalize_status_filter(status_filter)
+            orders = orders.filter(self._status_query(normalized_status))
 
         orders = orders.select_related('product', 'customer').order_by('-created_at')
         serializer = OrderSerializer(orders, many=True)
@@ -331,10 +333,43 @@ class OrderList(APIView):
             return None
 
     @staticmethod
+    def _normalize_status_filter(raw_value):
+        value = (raw_value or '').strip().lower()
+        status_map = {
+            'accepted': Order.STATUS_ACCEPTED,
+            'заказ принят': Order.STATUS_ACCEPTED,
+            'pending': Order.STATUS_PENDING_PAYMENT,
+            'pending_payment': Order.STATUS_PENDING_PAYMENT,
+            'ожидает оплаты': Order.STATUS_PENDING_PAYMENT,
+            'paid': Order.STATUS_PAID,
+            'оплачено': Order.STATUS_PAID,
+            'delivered': Order.STATUS_DELIVERED,
+            'доставлено': Order.STATUS_DELIVERED,
+        }
+        return status_map.get(value, value)
+
+    @staticmethod
+    def _status_query(status_value):
+        # Include legacy title-case values that can still exist in old rows.
+        if status_value == Order.STATUS_ACCEPTED:
+            return Q(status=Order.STATUS_ACCEPTED) | Q(status='Pending')
+        if status_value == Order.STATUS_PENDING_PAYMENT:
+            return Q(status=Order.STATUS_PENDING_PAYMENT)
+        if status_value == Order.STATUS_PAID:
+            return Q(status=Order.STATUS_PAID) | Q(status='Paid')
+        if status_value == Order.STATUS_DELIVERED:
+            return Q(status=Order.STATUS_DELIVERED) | Q(status='Delivered')
+        return Q(status=status_value)
+
+    @staticmethod
     def _get_role(user):
         try:
             return UserProfile.objects.get(user=user).role
         except UserProfile.DoesNotExist:
+            if user.is_staff or user.is_superuser:
+                return 'seller'
+            if Product.objects.filter(owner=user).exists():
+                return 'seller'
             return 'buyer'
 
 
