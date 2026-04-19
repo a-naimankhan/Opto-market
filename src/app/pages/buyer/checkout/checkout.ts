@@ -198,12 +198,11 @@ export class Checkout {
     this.orderService.checkout(payload).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.cartService.clear();
         this.submitSuccess = 'Заказ принят и отправлен продавцу.';
         if (typeof window !== 'undefined' && window.localStorage) {
           window.localStorage.removeItem(CHECKOUT_DRAFT_KEY);
         }
-        this.router.navigate(['/buyer/orders']);
+        this.router.navigate(['/'], { queryParams: { order: 'success' } });
       },
       error: (error: { error?: { error?: string } }) => {
         this.isSubmitting = false;

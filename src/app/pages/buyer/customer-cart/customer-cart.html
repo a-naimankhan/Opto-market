@@ -1,7 +1,7 @@
 <section class="cart-page">
 	<header class="cart-page-header">
 		<h2>Корзина покупателя</h2>
-		<a routerLink="/buyer" class="back-link">Вернуться к товарам</a>
+		<a routerLink="/" class="back-link">На главный экран</a>
 	</header>
 
 	<div *ngIf="cartItems.length; else emptyState" class="cart-grid">
@@ -41,7 +41,7 @@
 	<ng-template #emptyState>
 		<div class="empty-state">
 			Корзина пока пуста.
-			<a routerLink="/buyer" class="back-link">Перейти к товарам</a>
+			<a routerLink="/" class="back-link">На главный экран</a>
 		</div>
 	</ng-template>
 </section>

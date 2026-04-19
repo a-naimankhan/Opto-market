@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../../services/product/product';
 import { AuthUser, CartItem, Category, Product } from '../../../models/api.models';
 import { Subscription } from 'rxjs';
@@ -25,15 +25,18 @@ export class Landing implements OnInit, OnDestroy {
   selectedCategoryId: number | null = null;
   isCartSidebarOpen = false;
   isProfileOpen = false;
+  orderSuccessMessage = '';
   private productsSubscription?: Subscription;
   private cartSubscription?: Subscription;
   private userSubscription?: Subscription;
+  private routeSubscription?: Subscription;
 
   constructor(
     private productService: ProductService,
     private cartService: CartService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -51,6 +54,11 @@ export class Landing implements OnInit, OnDestroy {
     if (this.authService.getToken() && !this.authService.currentUser) {
       this.authService.loadUserProfile().subscribe();
     }
+
+    this.routeSubscription = this.route.queryParamMap.subscribe((params) => {
+      const orderStatus = params.get('order');
+      this.orderSuccessMessage = orderStatus === 'success' ? 'Заказ оформлен' : '';
+    });
   }
 
   loadCategories(): void {
@@ -90,6 +98,17 @@ export class Landing implements OnInit, OnDestroy {
     this.productsSubscription?.unsubscribe();
     this.cartSubscription?.unsubscribe();
     this.userSubscription?.unsubscribe();
+    this.routeSubscription?.unsubscribe();
+  }
+
+  closeOrderSuccessMessage(): void {
+    this.orderSuccessMessage = '';
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { order: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   get filteredProducts(): Product[] {

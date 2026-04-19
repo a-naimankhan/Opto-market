@@ -129,6 +129,30 @@
 	padding: 44px 26px 50px;
 }
 
+.order-success {
+	margin: 0 auto 20px;
+	max-width: 720px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+	background: #eaf7d9;
+	border: 1px solid #bddd8b;
+	color: #2e5f10;
+	padding: 12px 14px;
+	border-radius: 10px;
+	font-weight: 700;
+}
+
+.order-success button {
+	border: none;
+	background: transparent;
+	color: #2e5f10;
+	font-size: 14px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
 .hero {
 	text-align: center;
 	margin-bottom: 30px;

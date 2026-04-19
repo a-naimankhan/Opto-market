@@ -44,6 +44,11 @@
 	</header>
 
 	<main class="content">
+		<div class="order-success" *ngIf="orderSuccessMessage">
+			<span>{{ orderSuccessMessage }}</span>
+			<button type="button" (click)="closeOrderSuccessMessage()">x</button>
+		</div>
+
 		<section class="hero">
 			<h1>Лучшие товары</h1>
 			<p>Свежие товары от проверенных продавцов для ежедневных покупок.</p>
