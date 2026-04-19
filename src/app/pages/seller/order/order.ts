@@ -26,6 +26,13 @@ export class Order implements OnInit {
     this.loadOrders();
   }
 
+  applyFilters(): void {
+    if (this.isLoading) {
+      return;
+    }
+    this.loadOrders();
+  }
+
   loadOrders(): void {
     this.isLoading = true;
     this.errorMessage = '';

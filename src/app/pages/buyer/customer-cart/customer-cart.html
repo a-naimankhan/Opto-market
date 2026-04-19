@@ -13,7 +13,13 @@
 
 			<div class="line-controls">
 				<button type="button" (click)="decrease(item.product.id)">-</button>
-				<span>{{ item.quantity }}</span>
+				<input
+					type="number"
+					min="1"
+					[max]="item.product.stock_quantity"
+					[value]="item.quantity"
+					(input)="onQuantityInput(item.product.id, $any($event.target).value)"
+				/>
 				<button type="button" (click)="increase(item.product.id)">+</button>
 			</div>
 

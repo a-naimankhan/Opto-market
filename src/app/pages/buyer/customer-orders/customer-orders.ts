@@ -38,6 +38,13 @@ export class CustomerOrders implements OnInit {
     this.loadOrders();
   }
 
+  applyFilters(): void {
+    if (this.isLoading) {
+      return;
+    }
+    this.loadOrders();
+  }
+
   loadOrders(): void {
     this.isLoading = true;
     this.errorMessage = '';
@@ -50,7 +57,15 @@ export class CustomerOrders implements OnInit {
       })
       .subscribe({
         next: (orders) => {
-          this.orders = orders;
+          const normalizedOrders = orders.map((order) => ({
+            ...order,
+            status: this.normalizeStatus(order.status),
+          }));
+
+          this.orders = this.statusFilter
+            ? normalizedOrders.filter((order) => this.normalizeStatus(order.status) === this.statusFilter)
+            : normalizedOrders;
+
           this.isLoading = false;
           this.initializeReviewDrafts();
           this.loadExistingReviews();
@@ -143,15 +158,31 @@ export class CustomerOrders implements OnInit {
   }
 
   statusLabel(status: OrderStatus): string {
-    if (status === 'accepted') {
+    const normalizedStatus = this.normalizeStatus(status);
+
+    if (normalizedStatus === 'accepted') {
       return 'Заказ принят';
     }
-    if (status === 'pending_payment') {
+    if (normalizedStatus === 'pending_payment') {
       return 'Ожидает оплаты';
     }
-    if (status === 'paid') {
+    if (normalizedStatus === 'paid') {
       return 'Оплачено';
     }
     return 'Доставлено';
+  }
+
+  private normalizeStatus(status: string): OrderStatus {
+    const value = (status || '').toString().trim().toLowerCase();
+    if (value === 'accepted' || value === 'заказ принят') {
+      return 'accepted';
+    }
+    if (value === 'pending_payment' || value === 'pending' || value === 'ожидает оплаты') {
+      return 'pending_payment';
+    }
+    if (value === 'paid' || value === 'оплачено') {
+      return 'paid';
+    }
+    return 'delivered';
   }
 }

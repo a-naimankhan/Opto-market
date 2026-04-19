@@ -4,17 +4,17 @@
 		<p>После поступления заказа свяжитесь с покупателем для подтверждения условий оплаты и доставки.</p>
 	</header>
 
-	<div class="filters">
+	<form class="filters" (ngSubmit)="applyFilters()">
 		<label>
 			Дата от
-			<input type="date" [(ngModel)]="dateFrom" />
+			<input type="date" name="dateFrom" [(ngModel)]="dateFrom" />
 		</label>
 		<label>
 			Дата до
-			<input type="date" [(ngModel)]="dateTo" />
+			<input type="date" name="dateTo" [(ngModel)]="dateTo" />
 		</label>
-		<button type="button" (click)="loadOrders()">Применить фильтр</button>
-	</div>
+		<button type="submit">Применить фильтр</button>
+	</form>
 
 	<p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 	<p *ngIf="isLoading">Загрузка...</p>

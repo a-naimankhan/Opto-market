@@ -4,24 +4,24 @@
 		<p>История заказов хранится бессрочно. Используйте фильтры по датам для отчетов.</p>
 	</header>
 
-	<div class="filters">
+	<form class="filters" (ngSubmit)="applyFilters()">
 		<label>
 			Дата от
-			<input type="date" [(ngModel)]="dateFrom" />
+			<input type="date" name="dateFrom" [(ngModel)]="dateFrom" />
 		</label>
 		<label>
 			Дата до
-			<input type="date" [(ngModel)]="dateTo" />
+			<input type="date" name="dateTo" [(ngModel)]="dateTo" />
 		</label>
 		<label>
 			Статус
-			<select [(ngModel)]="statusFilter">
+			<select name="statusFilter" [(ngModel)]="statusFilter">
 				<option value="">Все статусы</option>
 				<option *ngFor="let status of statuses" [value]="status">{{ statusLabel(status) }}</option>
 			</select>
 		</label>
-		<button type="button" (click)="loadOrders()">Применить</button>
-	</div>
+		<button type="submit">Применить</button>
+	</form>
 
 	<p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 	<p *ngIf="isLoading">Загрузка...</p>

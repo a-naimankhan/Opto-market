@@ -31,6 +31,15 @@ export class CustomerCart {
     this.cartService.remove(productId);
   }
 
+  onQuantityInput(productId: number, rawValue: string): void {
+    const parsed = Number(rawValue);
+    if (!Number.isFinite(parsed)) {
+      return;
+    }
+
+    this.cartService.setQuantity(productId, Math.trunc(parsed));
+  }
+
   clear(): void {
     this.cartService.clear();
   }

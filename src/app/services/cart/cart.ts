@@ -1,15 +1,26 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { CartItem, Product } from '../../models/api.models';
+import { AuthService } from '../auth/auth';
 
-const CART_STORAGE_KEY = 'optomarket_cart_items';
+const CART_STORAGE_KEY_PREFIX = 'optomarket_cart_items_user_';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CartService {
-  private readonly itemsSubject = new BehaviorSubject<CartItem[]>(this.readFromStorage());
+  private readonly itemsSubject = new BehaviorSubject<CartItem[]>([]);
   readonly items$ = this.itemsSubject.asObservable();
+
+  private activeStorageKey: string | null = null;
+
+  constructor(private authService: AuthService) {
+    this.authService.currentUser$.subscribe((user) => {
+      // Guests should always see an empty cart; authenticated users get their own persisted cart.
+      this.activeStorageKey = user ? `${CART_STORAGE_KEY_PREFIX}${user.id}` : null;
+      this.itemsSubject.next(this.readFromActiveStorage());
+    });
+  }
 
   get items(): CartItem[] {
     return this.itemsSubject.value;
@@ -78,6 +89,24 @@ export class CartService {
     this.commit(next);
   }
 
+  setQuantity(productId: number, quantity: number): void {
+    const next = this.items.map((item) => {
+      if (item.product.id !== productId) {
+        return item;
+      }
+
+      const maxAllowed = Math.max(1, item.product.stock_quantity);
+      const safeQuantity = this.ensureMinQuantity(quantity);
+
+      return {
+        ...item,
+        quantity: Math.min(maxAllowed, safeQuantity),
+      };
+    });
+
+    this.commit(next);
+  }
+
   remove(productId: number): void {
     this.commit(this.items.filter((item) => item.product.id !== productId));
   }
@@ -88,17 +117,17 @@ export class CartService {
 
   private commit(items: CartItem[]): void {
     this.itemsSubject.next(items);
-    if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    if (typeof window !== 'undefined' && window.localStorage && this.activeStorageKey) {
+      window.localStorage.setItem(this.activeStorageKey, JSON.stringify(items));
     }
   }
 
-  private readFromStorage(): CartItem[] {
-    if (typeof window === 'undefined' || !window.localStorage) {
+  private readFromActiveStorage(): CartItem[] {
+    if (typeof window === 'undefined' || !window.localStorage || !this.activeStorageKey) {
       return [];
     }
 
-    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    const raw = window.localStorage.getItem(this.activeStorageKey);
     if (!raw) {
       return [];
     }

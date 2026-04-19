@@ -55,6 +55,15 @@
 	gap: 8px;
 }
 
+.line-controls input {
+	width: 62px;
+	height: 30px;
+	border: 1px solid #d0d0d0;
+	border-radius: 7px;
+	padding: 0 8px;
+	text-align: center;
+}
+
 .line-controls button {
 	width: 28px;
 	height: 28px;
