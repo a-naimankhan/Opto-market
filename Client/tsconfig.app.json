@@ -8,10 +8,10 @@
       "node"
     ]
   },
-  "include": [
-    "Client/src/**/*.ts"
+    "include": [
+    "src/**/*.ts"
   ],
   "exclude": [
-    "Client/src/**/*.spec.ts"
+    "src/**/*.spec.ts"
   ]
 }
