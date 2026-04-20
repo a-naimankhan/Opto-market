@@ -1,0 +1,87 @@
+<section class="seller-catalog-page">
+	<header class="catalog-hero">
+		<h2>Каталог всех продавцов</h2>
+		<p>Товары по категориям с постраничной навигацией.</p>
+		<div class="search-wrap">
+			<input
+				type="text"
+				[(ngModel)]="searchQuery"
+				placeholder="Поиск по названию, продавцу, категории"
+			/>
+		</div>
+	</header>
+
+	<section class="filter-strip">
+		<button
+			type="button"
+			class="filter-btn"
+			[class.active]="selectedCategoryId === null"
+			(click)="filterByCategory(null)"
+		>
+			Все товары
+		</button>
+		<button
+			type="button"
+			class="filter-btn"
+			*ngFor="let cat of categories"
+			[class.active]="selectedCategoryId === cat.id"
+			(click)="filterByCategory(cat.id)"
+		>
+			{{ cat.name }}
+		</button>
+	</section>
+
+	<p class="status info" *ngIf="isLoading && !products.length">Загрузка товаров...</p>
+	<p class="status error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+	<section class="cards-row" *ngIf="!errorMessage && filteredProducts.length; else noProducts">
+		<article class="product-card" *ngFor="let product of filteredProducts">
+			<div *ngIf="product.image" class="product-image">
+				<img [src]="product.image" [alt]="product.name" />
+			</div>
+			<div *ngIf="!product.image" class="product-image placeholder">📦</div>
+
+			<div class="product-info">
+				<h3>{{ product.name }}</h3>
+				<p class="seller">Продавец: {{ product.seller_name }} ({{ product.seller_phone }})</p>
+				<p class="meta">Категория: {{ categoryNameById(product.category) }}</p>
+				<p class="meta">В наличии: {{ product.stock_quantity }} {{ product.unit }}</p>
+				<p class="price">KZT {{ product.price }}</p>
+			</div>
+		</article>
+	</section>
+
+	<ng-template #noProducts>
+		<p class="status info" *ngIf="!isLoading && !errorMessage">По вашему запросу товары не найдены.</p>
+	</ng-template>
+
+	<nav class="pagination" *ngIf="!isLoading && !errorMessage && totalPages > 1">
+		<button
+			type="button"
+			class="page-btn"
+			[disabled]="currentPage === 1"
+			(click)="goToPage(currentPage - 1)"
+		>
+			Назад
+		</button>
+
+		<button
+			type="button"
+			class="page-btn number"
+			*ngFor="let page of pageNumbers"
+			[class.active]="page === currentPage"
+			(click)="goToPage(page)"
+		>
+			{{ page }}
+		</button>
+
+		<button
+			type="button"
+			class="page-btn"
+			[disabled]="currentPage === totalPages"
+			(click)="goToPage(currentPage + 1)"
+		>
+			Вперед
+		</button>
+	</nav>
+</section>

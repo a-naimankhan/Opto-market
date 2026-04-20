@@ -1,0 +1,46 @@
+<div class="background">
+  <div class="shape"></div>
+  <div class="shape"></div>
+</div>
+<form *ngIf="!isRegister">
+  <h3>Login Here</h3>
+
+  <label for="username">Username</label>
+  <input type="text" name="username" [(ngModel)]="loginObj.username" placeholder="Username" id="username">
+
+  <label for="password">Password</label>
+  <input type="password" name="password" [(ngModel)]="loginObj.password" placeholder="Password" id="password">
+
+  <button type="button" style="color: black" (click)="onLogin()">Log In</button>
+  <div class="social">
+    <div class="go" (click)="isRegister = !isRegister"> <i class="fab fa-google"></i>  Register</div>
+     
+  </div>
+</form>
+<form *ngIf="isRegister">
+  <h3>Register Here</h3>
+
+  <label for="register-username">Username</label>
+  <input type="text" name="registerUsername" [(ngModel)]="registerObj.username" placeholder="Username" id="register-username">
+
+  <label for="register-email">Email</label>
+  <input type="email" name="registerEmail" [(ngModel)]="registerObj.email" placeholder="Email" id="register-email">
+
+  <label for="register-password">Password</label>
+  <input type="password" name="registerPassword" [(ngModel)]="registerObj.password" placeholder="Password" id="register-password">
+
+  <label for="register-password2">Repeat password</label>
+  <input type="password" name="registerPassword2" [(ngModel)]="registerObj.password2" placeholder="Repeat password" id="register-password2">
+
+  <label for="register-role">Role</label>
+  <select id="register-role" name="registerRole" [(ngModel)]="registerObj.role">
+    <option value="buyer">Buyer</option>
+    <option value="seller">Seller</option>
+  </select>
+
+  <button type="button" style="color: black" (click)="onRegister()">Register</button>
+  <div class="social">
+    <div class="go" (click)="isRegister = !isRegister"> <i class="fab fa-google"></i>  Login</div>
+    
+  </div>
+</form>

@@ -1,0 +1,147 @@
+.cart-page {
+	max-width: 900px;
+	margin: 26px auto;
+	padding: 0 14px 30px;
+}
+
+.cart-page-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 16px;
+}
+
+.cart-page-header h2 {
+	margin: 0;
+}
+
+.back-link {
+	color: #3b7b10;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.cart-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.cart-line {
+	display: grid;
+	grid-template-columns: 1fr auto auto auto;
+	gap: 14px;
+	align-items: center;
+	background: #fff;
+	border: 1px solid #e9e9e9;
+	border-radius: 12px;
+	padding: 12px;
+}
+
+.cart-line h3 {
+	margin: 0;
+	font-size: 18px;
+}
+
+.cart-line p {
+	margin: 3px 0 0;
+	color: #666;
+}
+
+.line-controls {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.line-controls input {
+	width: 62px;
+	height: 30px;
+	border: 1px solid #d0d0d0;
+	border-radius: 7px;
+	padding: 0 8px;
+	text-align: center;
+}
+
+.line-controls button {
+	width: 28px;
+	height: 28px;
+	border: 1px solid #d0d0d0;
+	background: #fff;
+	border-radius: 7px;
+}
+
+.remove-btn {
+	border: none;
+	background: transparent;
+	color: #bf2f1c;
+	cursor: pointer;
+}
+
+.cart-summary {
+	margin-top: 8px;
+	background: #f4faea;
+	border: 1px solid #ddedc3;
+	border-radius: 12px;
+	padding: 14px;
+}
+
+.cart-summary p {
+	margin: 0;
+	font-size: 22px;
+}
+
+.cart-summary small {
+	color: #65785b;
+}
+
+.actions {
+	margin-top: 12px;
+	display: flex;
+	gap: 10px;
+}
+
+.reset,
+.checkout-link {
+	border: none;
+	border-radius: 9px;
+	padding: 10px 12px;
+	text-decoration: none;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.reset {
+	background: #fff;
+	border: 1px solid #d0d0d0;
+}
+
+.checkout-link {
+	background: #6cbf0a;
+	color: #fff;
+}
+
+.empty-state {
+	background: #fff;
+	border: 1px dashed #c8c8c8;
+	border-radius: 12px;
+	padding: 22px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+}
+
+@media (max-width: 760px) {
+	.cart-line {
+		grid-template-columns: 1fr;
+	}
+
+	.actions,
+	.empty-state,
+	.cart-page-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}

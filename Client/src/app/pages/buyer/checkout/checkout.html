@@ -1,0 +1,114 @@
+<section class="checkout-page">
+	<header class="checkout-header">
+		<h2>Оформление заказа</h2>
+		<a routerLink="/buyer/cart">Открыть корзину</a>
+	</header>
+
+	<div class="checkout-layout">
+		<form class="checkout-form" [formGroup]="checkoutForm" (ngSubmit)="submitOrder()">
+			<fieldset>
+				<legend>Контакты покупателя</legend>
+				<div class="grid two-col">
+					<label>
+						Имя
+						<input type="text" formControlName="customer_first_name" />
+					</label>
+					<label>
+						Фамилия
+						<input type="text" formControlName="customer_last_name" />
+					</label>
+					<label>
+						Телефон
+						<input type="text" formControlName="customer_phone" />
+					</label>
+					<label>
+						Email
+						<input type="email" formControlName="customer_email" />
+					</label>
+				</div>
+			</fieldset>
+
+			<fieldset>
+				<legend>Получатель</legend>
+				<label class="checkbox-row">
+					<input type="checkbox" formControlName="has_other_recipient" />
+					Другой получатель
+				</label>
+
+				<div class="grid two-col" *ngIf="isAnotherPerson">
+					<label>
+						Имя получателя
+						<input type="text" formControlName="recipient_first_name" />
+					</label>
+					<label>
+						Фамилия получателя
+						<input type="text" formControlName="recipient_last_name" />
+					</label>
+					<label>
+						Телефон получателя
+						<input type="text" formControlName="recipient_phone" />
+					</label>
+					<label>
+						Email получателя
+						<input type="email" formControlName="recipient_email" />
+					</label>
+				</div>
+			</fieldset>
+
+			<fieldset>
+				<legend>Доставка</legend>
+				<label class="radio-row">
+					<input type="radio" formControlName="delivery_method" value="pickup" />
+					Самовывоз
+				</label>
+				<label class="radio-row">
+					<input type="radio" formControlName="delivery_method" value="other_city" />
+					Доставка в другой город
+				</label>
+				<p class="delivery-warning">Стоимость доставки уточняется продавцом при подтверждении заказа.</p>
+			</fieldset>
+
+			<fieldset>
+				<legend>Оплата</legend>
+				<label class="radio-row">
+					<input type="radio" formControlName="payment_method" value="cash" />
+					Наличный расчет
+				</label>
+				<label class="radio-row">
+					<input type="radio" formControlName="payment_method" value="non_cash" />
+					Безналичный расчет
+				</label>
+			</fieldset>
+
+			<div class="form-actions">
+				<button type="button" (click)="resetForm()">Сбросить</button>
+				<button type="button" (click)="saveTemplate()">Сохранить как шаблон</button>
+				<button type="button" (click)="saveDraft()">Сохранить</button>
+				<button type="button" (click)="loadTemplate()">Загрузить шаблон</button>
+				<button type="submit" [disabled]="isSubmitting">Оформить заказ</button>
+			</div>
+
+			<p class="error" *ngIf="submitError">{{ submitError }}</p>
+			<p class="success" *ngIf="submitSuccess">{{ submitSuccess }}</p>
+		</form>
+
+		<aside class="order-summary">
+			<h3>Ваш заказ</h3>
+			<div *ngIf="cartItems.length; else emptyCart" class="summary-items">
+				<article *ngFor="let item of cartItems">
+					<p>{{ item.product.name }}</p>
+					<small>{{ item.product.price }} x {{ item.quantity }}</small>
+				</article>
+			</div>
+			<ng-template #emptyCart>
+				<p class="empty">Корзина пуста</p>
+			</ng-template>
+
+			<div class="summary-total">
+				<span>К оплате</span>
+				<strong>{{ subtotal | number: '1.2-2' }}</strong>
+			</div>
+			<small>Без учета доставки</small>
+		</aside>
+	</div>
+</section>

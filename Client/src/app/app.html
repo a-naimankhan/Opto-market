@@ -1,0 +1,10 @@
+<router-outlet />
+
+<button
+	type="button"
+	class="back-home-btn"
+	*ngIf="showBackToHomeButton"
+	(click)="goToHome()"
+>
+	Назад на главную
+</button>

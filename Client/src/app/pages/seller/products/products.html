@@ -1,0 +1,120 @@
+<div class="row">
+    <div [ngClass]="isSidePanelVisible ? 'col-8' : 'col-12'">
+        <div class="card">
+            <div class="card-header bg-primary">
+                <div class="row">
+                    <div class="col-6">
+                        Актуальные товары всех пользователей
+                    </div>
+                    <div class="col-6 text-end">
+                        <button class="btn btn-sm btn-success" (click)="openSidePanel()">Добавить товары</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 text-center py-4" *ngIf="!isProductsLoaded && !productsList.length">
+                        Загрузка товаров...
+                    </div>
+
+                    <div class="col-12 text-center py-4 text-danger" *ngIf="isProductsLoaded && productsLoadError">
+                        {{ productsLoadError }}
+                    </div>
+
+                    <div class="col-12 text-center py-4" *ngIf="isProductsLoaded && !productsLoadError && !productsList.length">
+                        Пока нет товаров. Добавьте первый товар.
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-4 mb-3" *ngFor="let product of productsList">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="mb-2" *ngIf="product.image">
+                                    <img [src]="product.image" [alt]="product.name" class="img-fluid rounded" style="max-height: 160px; object-fit: cover; width: 100%;">
+                                </div>
+                                <h4 class="card-title">{{ product.name }}</h4>
+                                <p class="card-text mb-1"><strong>Категория:</strong> {{ categoryNameById(product.category) }}</p>
+                                <p class="card-text mb-1"><strong>Цена:</strong> {{ product.price }} KZT / {{ product.unit }}</p>
+                                <p class="card-text mb-1"><strong>Остаток:</strong> {{ product.stock_quantity }}</p>
+                                <p class="card-text mb-1"><strong>Мин. заказ:</strong> {{ product.min_quantity }}</p>
+                                <p class="card-text mb-0"><strong>Продавец:</strong> {{ product.seller_name }} {{ product.seller_phone }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+        </div>
+    </div>
+    <div class="col-4" *ngIf="isSidePanelVisible">
+        <div class="card">
+            <div class="card-header bg-primary">
+                <div class="row">
+                    <div class="col-6">
+                        Новый товар
+                    </div>
+                    <div class="col-6 text-end">
+                        <button class="btn btn-sm btn-success" (click)="closeSidePanel()">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <label for="">Название товара</label>
+                        <input type="text" class="form-control" [(ngModel)]="productObj.name" name="name">
+            </div>
+            <div class="col-6">
+                        <label for="">Категория</label>
+                        <select class="form-select" [(ngModel)]="productObj.category" name="category">
+                            <option [ngValue]="0" disabled>Выберите категорию</option>
+                            <option *ngFor="let category of categoryList" [ngValue]="category.id">{{ category.name }}</option>
+                        </select>
+            </div>
+            
+            <div class="col-6">
+                        <label for="">Цена</label>
+                        <input type="number" class="form-control" [(ngModel)]="productObj.price" name="price">
+            </div>
+            <div class="col-6">
+                        <label for="">Количество на складе</label>
+                        <input type="number" class="form-control" [(ngModel)]="productObj.stock_quantity" name="stockQuantity">
+            </div>
+            
+            <div class="col-6">
+                        <label for="">Минимальный объем заказа</label>
+                        <input type="number" class="form-control" [(ngModel)]="productObj.min_quantity" name="minQuantity">
+            </div>
+            <div class="col-6">
+                        <label for="">Единица измерения</label>
+                        <input type="text" class="form-control" [(ngModel)]="productObj.unit" name="unit">
+            </div>
+            <div class="col-6">
+                        <label for="">Имя продавца</label>
+                        <input type="text" class="form-control" [(ngModel)]="productObj.seller_name" name="sellerName">
+        </div>
+        <div class="col-6">
+                        <label for="">Телефон продавца</label>
+                        <input type="text" class="form-control" [(ngModel)]="productObj.seller_phone" name="sellerPhone">
+            </div>
+            <div class="col-12 mt-2">
+                        <label for="productImage">Фото товара</label>
+                        <input id="productImage" type="file" accept="image/*" class="form-control" (change)="onImageSelected($event)">
+            </div>
+            </div>
+            <div class="row">
+        <div class="col-12 mt-3">
+                        <button class="btn btn-success " (click)="onSave()">Добавить</button>
+            </div>
+
+
+    </div>
+</div>
+</div>
+</div>
+
+</div>   
+    
+
+
