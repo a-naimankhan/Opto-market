@@ -9,6 +9,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from .serializers import CategorySerializer, ProductSerializer, OrderSerializer, ProductReviewSerializer
 from .models import UserProfile, Product, Category, Order, OrderStatusHistory, ProductReview
 
@@ -61,6 +62,8 @@ from rest_framework.permissions import IsAuthenticated
 
 # 1. CBV для списка и создания (Full CRUD)
 class ProductList(APIView):
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
     # Список открыт для всех, изменения только для аутентифицированных
     def get_permissions(self):
         if self.request.method == 'GET':
@@ -92,7 +95,7 @@ class ProductList(APIView):
             pass
 
         page = paginator.paginate_queryset(products, request)
-        serializer = ProductSerializer(page, many=True)
+        serializer = ProductSerializer(page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
     def post(self, request):
@@ -116,7 +119,7 @@ class ProductList(APIView):
         payload = request.data.copy()
         payload['category'] = category_obj.id
 
-        serializer = ProductSerializer(data=payload)
+        serializer = ProductSerializer(data=payload, context={'request': request})
         if serializer.is_valid():
             serializer.save(owner=request.user)
             return Response(serializer.data, status=201)

@@ -25,6 +25,7 @@ class Category(models.Model):
 # 3. Модель Товара (Овощи/Фрукты)
 class Product(models.Model):
     name = models.CharField(max_length=255)
+    image = models.FileField(upload_to='products/', blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products') # ForeignKey 1
     owner = models.ForeignKey(User, on_delete=models.CASCADE) # ForeignKey 2 (Фермер)
     seller_name = models.CharField(max_length=255, blank=True)

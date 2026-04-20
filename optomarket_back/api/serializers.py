@@ -16,6 +16,14 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['owner'] # Владелец назначается автоматически
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        image_url = data.get('image')
+        if request and image_url and image_url.startswith('/'):
+            data['image'] = request.build_absolute_uri(image_url)
+        return data
+
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
