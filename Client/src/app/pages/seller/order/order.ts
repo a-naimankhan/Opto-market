@@ -11,12 +11,14 @@ import { OrderService } from '../../../services/order/order';
   styleUrl: './order.css',
 })
 export class Order implements OnInit {
+  allOrders: OrderItem[] = [];
   orders: OrderItem[] = [];
   draftStatuses: Record<number, Exclude<OrderStatus, 'accepted'>> = {};
   dateFrom = '';
   dateTo = '';
   isLoading = false;
   errorMessage = '';
+  private hasAppliedDateRange = false;
 
   readonly sellerStatuses: Array<Exclude<OrderStatus, 'accepted'>> = ['pending_payment', 'paid', 'delivered'];
 
@@ -30,29 +32,37 @@ export class Order implements OnInit {
     if (this.isLoading) {
       return;
     }
-    this.loadOrders();
+
+    if (!this.dateFrom || !this.dateTo) {
+      this.errorMessage = 'Для фильтра выберите диапазон дат: и "Дата от", и "Дата до".';
+      return;
+    }
+
+    if (this.dateFrom > this.dateTo) {
+      this.errorMessage = 'Дата "от" не может быть больше даты "до".';
+      return;
+    }
+
+    this.hasAppliedDateRange = true;
+    this.errorMessage = '';
+    this.applyCurrentFilters();
   }
 
   loadOrders(): void {
     this.isLoading = true;
     this.errorMessage = '';
     this.orderService
-      .getOrders({
-        dateFrom: this.dateFrom || undefined,
-        dateTo: this.dateTo || undefined,
-      })
+      .getOrders()
       .subscribe({
         next: (orders) => {
-          this.orders = orders;
-          this.draftStatuses = {};
-          for (const order of orders) {
-            this.draftStatuses[order.id] = this.asSellerStatus(order.status);
-          }
+          this.allOrders = orders;
+          this.applyCurrentFilters();
           this.isLoading = false;
         },
         error: () => {
           this.errorMessage = 'Не удалось загрузить заказы продавца.';
           this.isLoading = false;
+          this.allOrders = [];
           this.orders = [];
         },
       });
@@ -66,7 +76,8 @@ export class Order implements OnInit {
 
     this.orderService.updateStatus(order.id, nextStatus).subscribe({
       next: (updatedOrder) => {
-        this.orders = this.orders.map((entry) => (entry.id === updatedOrder.id ? updatedOrder : entry));
+        this.allOrders = this.allOrders.map((entry) => (entry.id === updatedOrder.id ? updatedOrder : entry));
+        this.applyCurrentFilters();
       },
       error: () => {
         this.errorMessage = 'Не удалось обновить статус заказа.';
@@ -92,5 +103,34 @@ export class Order implements OnInit {
       return 'pending_payment';
     }
     return status;
+  }
+
+  private applyCurrentFilters(): void {
+    let nextOrders = [...this.allOrders];
+
+    if (this.hasAppliedDateRange && this.dateFrom && this.dateTo) {
+      nextOrders = nextOrders.filter((order) => this.isWithinDateRange(order.created_at, this.dateFrom, this.dateTo));
+    }
+
+    this.orders = nextOrders;
+    this.draftStatuses = {};
+    for (const order of nextOrders) {
+      this.draftStatuses[order.id] = this.asSellerStatus(order.status);
+    }
+  }
+
+  private isWithinDateRange(createdAt: string, from: string, to: string): boolean {
+    const createdDateOnly = this.extractDateOnly(createdAt);
+    if (!createdDateOnly) {
+      return false;
+    }
+
+    return createdDateOnly >= from && createdDateOnly <= to;
+  }
+
+  private extractDateOnly(createdAt: string): string {
+    const value = (createdAt || '').toString();
+    const match = value.match(/^\d{4}-\d{2}-\d{2}/);
+    return match ? match[0] : '';
   }
 }
