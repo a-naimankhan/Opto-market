@@ -1,9 +1,0 @@
-.register-box { max-width: 400px; margin: 50px auto; padding: 30px; border: 1px solid #ccc; border-radius: 10px; }
-.role-selection { display: flex; gap: 10px; margin-bottom: 20px; }
-.role-selection button { flex: 1; padding: 10px; border: 2px solid #ddd; background: white; cursor: pointer; border-radius: 5px; }
-.role-selection button.active { border-color: #28a745; background: #f8fff9; }
-input { width: 100%; display: block; margin-bottom: 15px; padding: 10px; box-sizing: border-box; }
-button[type="submit"] { width: 100%; padding: 12px; background: #28a745; color: white; border: none; cursor: pointer; border-radius: 5px; }
-button[type="submit"]:disabled { background: #ccc; cursor: not-allowed; }
-p { text-align: center; margin-top: 20px; }
-a { color: #007bff; text-decoration: none; }
