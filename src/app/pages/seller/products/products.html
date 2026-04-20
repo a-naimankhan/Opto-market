@@ -28,6 +28,9 @@
                     <div class="col-12 col-sm-6 col-lg-4 mb-3" *ngFor="let product of productsList">
                         <div class="card">
                             <div class="card-body">
+                                <div class="mb-2" *ngIf="product.image">
+                                    <img [src]="product.image" [alt]="product.name" class="img-fluid rounded" style="max-height: 160px; object-fit: cover; width: 100%;">
+                                </div>
                                 <h4 class="card-title">{{ product.name }}</h4>
                                 <p class="card-text mb-1"><strong>Категория:</strong> {{ categoryNameById(product.category) }}</p>
                                 <p class="card-text mb-1"><strong>Цена:</strong> {{ product.price }} KZT / {{ product.unit }}</p>
@@ -94,6 +97,10 @@
         <div class="col-6">
                         <label for="">Телефон продавца</label>
                         <input type="text" class="form-control" [(ngModel)]="productObj.seller_phone" name="sellerPhone">
+            </div>
+            <div class="col-12 mt-2">
+                        <label for="productImage">Фото товара</label>
+                        <input id="productImage" type="file" accept="image/*" class="form-control" (change)="onImageSelected($event)">
             </div>
             </div>
             <div class="row">

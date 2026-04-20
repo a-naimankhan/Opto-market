@@ -24,6 +24,7 @@ export class Products implements OnInit, OnDestroy {
   isSidePanelVisible: boolean = false; 
   isProductsLoaded: boolean = false;
   productsLoadError: string | null = null;
+  selectedImageFile: File | null = null;
   productObj: Partial<Product> = {
     name: '',
     category: 0,
@@ -80,7 +81,7 @@ export class Products implements OnInit, OnDestroy {
   }
 
   onSave() {
-    this.productSrv.saveProduct(this.productObj).subscribe({
+    this.productSrv.saveProduct(this.productObj, this.selectedImageFile).subscribe({
       next: () => {
         alert('Товар успешно добавлен');
         this.getProducts();
@@ -92,6 +93,12 @@ export class Products implements OnInit, OnDestroy {
     });
   }
 
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = input.files;
+    this.selectedImageFile = files && files.length ? files[0] : null;
+  }
+
 
   openSidePanel() {
     this.isSidePanelVisible = true;
@@ -99,6 +106,7 @@ export class Products implements OnInit, OnDestroy {
 
   closeSidePanel() {
     this.isSidePanelVisible = false;
+    this.selectedImageFile = null;
     this.productObj = {
       name: '',
       category: 0,

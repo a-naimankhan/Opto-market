@@ -1,27 +1,27 @@
 <section class="seller-orders">
-	<header>
+	<header class="orders-header">
 		<h2>Мои заказы</h2>
 		<p>После поступления заказа свяжитесь с покупателем для подтверждения условий оплаты и доставки.</p>
 	</header>
 
 	<form class="filters" (ngSubmit)="applyFilters()">
-		<label>
+		<label class="filter-field">
 			Дата от
 			<input type="date" name="dateFrom" [(ngModel)]="dateFrom" />
 		</label>
-		<label>
+		<label class="filter-field">
 			Дата до
 			<input type="date" name="dateTo" [(ngModel)]="dateTo" />
 		</label>
-		<button type="submit">Применить фильтр</button>
+		<button type="submit" class="apply-btn" [disabled]="isLoading">Применить фильтр</button>
 	</form>
 
 	<p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-	<p *ngIf="isLoading">Загрузка...</p>
+	<p class="info" *ngIf="isLoading">Загрузка...</p>
 
 	<div class="orders-list" *ngIf="!isLoading && orders.length">
 		<article class="order-card" *ngFor="let order of orders">
-			<div>
+			<div class="order-main">
 				<h3>{{ order.product.name }}</h3>
 				<p>Номер заказа: {{ order.order_number }}</p>
 				<p>Дата: {{ order.created_at | date: 'dd.MM.yyyy HH:mm' }}</p>
@@ -30,7 +30,7 @@
 				<p>Email: {{ order.customer_email }}</p>
 			</div>
 
-			<div>
+			<div class="order-side">
 				<p>Количество: {{ order.quantity }}</p>
 				<p>Сумма: {{ order.total_price | number: '1.2-2' }}</p>
 				<p>Доставка: {{ order.delivery_method === 'pickup' ? 'Самовывоз' : 'Доставка в другой город' }}</p>
@@ -41,11 +41,11 @@
 					<select [(ngModel)]="draftStatuses[order.id]">
 						<option *ngFor="let status of sellerStatuses" [value]="status">{{ statusLabel(status) }}</option>
 					</select>
-					<button type="button" (click)="saveStatus(order)">Сохранить статус</button>
+					<button type="button" class="save-btn" (click)="saveStatus(order)">Сохранить статус</button>
 				</div>
 			</div>
 		</article>
 	</div>
 
-	<p *ngIf="!isLoading && !orders.length">Заказов пока нет.</p>
+	<p class="info" *ngIf="!isLoading && !orders.length">Заказов пока нет.</p>
 </section>

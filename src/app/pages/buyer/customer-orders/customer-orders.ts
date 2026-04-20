@@ -103,6 +103,7 @@ export class CustomerOrders implements OnInit {
         next: () => {
           this.reviewSuccess[order.id] = 'Отзыв сохранен.';
           this.submittingReviews[order.id] = false;
+          alert('Отзыв отправлен');
         },
         error: (error: { error?: { error?: string } }) => {
           this.reviewErrors[order.id] = error?.error?.error ?? 'Не удалось сохранить отзыв.';

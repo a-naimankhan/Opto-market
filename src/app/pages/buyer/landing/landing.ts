@@ -26,6 +26,7 @@ export class Landing implements OnInit, OnDestroy {
   isCartSidebarOpen = false;
   isProfileOpen = false;
   orderSuccessMessage = '';
+  isContactOpen = false;
   private productsSubscription?: Subscription;
   private cartSubscription?: Subscription;
   private userSubscription?: Subscription;
@@ -199,4 +200,13 @@ export class Landing implements OnInit, OnDestroy {
   goToLogin(): void {
     this.router.navigate(['/login'], { queryParams: { redirect: this.router.url } });
   }
+
+  openContact(): void {
+    this.isContactOpen = true;
+  }
+
+  closeContact(): void {
+    this.isContactOpen = false;
+  }
 }
+  
