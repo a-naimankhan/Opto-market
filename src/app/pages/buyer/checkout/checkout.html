@@ -1,11 +1,11 @@
-<section class="checkout-page" [formGroup]="checkoutForm">
+<section class="checkout-page">
 	<header class="checkout-header">
 		<h2>Оформление заказа</h2>
 		<a routerLink="/buyer/cart">Открыть корзину</a>
 	</header>
 
 	<div class="checkout-layout">
-		<form class="checkout-form" (ngSubmit)="submitOrder()">
+		<form class="checkout-form" [formGroup]="checkoutForm" (ngSubmit)="submitOrder()">
 			<fieldset>
 				<legend>Контакты покупателя</legend>
 				<div class="grid two-col">

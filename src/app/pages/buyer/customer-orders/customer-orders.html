@@ -23,8 +23,9 @@
 		<button type="submit">Применить</button>
 	</form>
 
+	<p class="success" *ngIf="checkoutSuccessMessage">{{ checkoutSuccessMessage }}</p>
 	<p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-	<p *ngIf="isLoading">Загрузка...</p>
+	
 
 	<div class="orders-list" *ngIf="!isLoading && orders.length">
 		<article class="order-card" *ngFor="let order of orders">

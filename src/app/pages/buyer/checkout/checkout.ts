@@ -202,7 +202,8 @@ export class Checkout {
         if (typeof window !== 'undefined' && window.localStorage) {
           window.localStorage.removeItem(CHECKOUT_DRAFT_KEY);
         }
-        this.router.navigate(['/'], { queryParams: { order: 'success' } });
+        this.cartService.clear();
+        this.router.navigate(['/buyer/orders'], { queryParams: { created: '1' } });
       },
       error: (error: { error?: { error?: string } }) => {
         this.isSubmitting = false;

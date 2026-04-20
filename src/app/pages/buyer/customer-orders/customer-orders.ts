@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { OrderItem, OrderStatus, ProductReview } from '../../../models/api.models';
 import { OrderService } from '../../../services/order/order';
 import { AuthService } from '../../../services/auth/auth';
@@ -12,6 +13,7 @@ import { AuthService } from '../../../services/auth/auth';
   styleUrl: './customer-orders.css',
 })
 export class CustomerOrders implements OnInit {
+  allOrders: OrderItem[] = [];
   orders: OrderItem[] = [];
   reviewDrafts: Record<number, { rating: number; comment: string }> = {};
   reviewErrors: Record<number, string> = {};
@@ -22,13 +24,24 @@ export class CustomerOrders implements OnInit {
   statusFilter: OrderStatus | '' = '';
   isLoading = false;
   errorMessage = '';
+  checkoutSuccessMessage = '';
+  private hasAppliedDateRange = false;
   private currentUserId: number | null = null;
 
   readonly statuses: OrderStatus[] = ['accepted', 'pending_payment', 'paid', 'delivered'];
 
-  constructor(private orderService: OrderService, private authService: AuthService) {}
+  constructor(
+    private orderService: OrderService,
+    private authService: AuthService,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
+    const created = this.route.snapshot.queryParamMap.get('created');
+    if (created === '1') {
+      this.checkoutSuccessMessage = 'Заказ принят. Он сохранен в базе данных и отображается в списке ниже.';
+    }
+
     this.currentUserId = this.authService.currentUser?.id ?? null;
     if (!this.currentUserId && this.authService.getToken()) {
       this.authService.loadUserProfile().subscribe((user) => {
@@ -42,7 +55,20 @@ export class CustomerOrders implements OnInit {
     if (this.isLoading) {
       return;
     }
-    this.loadOrders();
+
+    if (!this.dateFrom || !this.dateTo) {
+      this.errorMessage = 'Для фильтра выберите диапазон дат: и "Дата от", и "Дата до".';
+      return;
+    }
+
+    if (this.dateFrom > this.dateTo) {
+      this.errorMessage = 'Дата "от" не может быть больше даты "до".';
+      return;
+    }
+
+    this.hasAppliedDateRange = true;
+    this.errorMessage = '';
+    this.applyCurrentFilters();
   }
 
   loadOrders(): void {
@@ -50,11 +76,7 @@ export class CustomerOrders implements OnInit {
     this.errorMessage = '';
 
     this.orderService
-      .getOrders({
-        dateFrom: this.dateFrom || undefined,
-        dateTo: this.dateTo || undefined,
-        status: this.statusFilter || undefined,
-      })
+      .getOrders()
       .subscribe({
         next: (orders) => {
           const normalizedOrders = orders.map((order) => ({
@@ -62,9 +84,8 @@ export class CustomerOrders implements OnInit {
             status: this.normalizeStatus(order.status),
           }));
 
-          this.orders = this.statusFilter
-            ? normalizedOrders.filter((order) => this.normalizeStatus(order.status) === this.statusFilter)
-            : normalizedOrders;
+          this.allOrders = normalizedOrders;
+          this.applyCurrentFilters();
 
           this.isLoading = false;
           this.initializeReviewDrafts();
@@ -185,5 +206,34 @@ export class CustomerOrders implements OnInit {
       return 'paid';
     }
     return 'delivered';
+  }
+
+  private applyCurrentFilters(): void {
+    let nextOrders = [...this.allOrders];
+
+    if (this.hasAppliedDateRange && this.dateFrom && this.dateTo) {
+      nextOrders = nextOrders.filter((order) => this.isWithinDateRange(order.created_at, this.dateFrom, this.dateTo));
+    }
+
+    if (this.statusFilter) {
+      nextOrders = nextOrders.filter((order) => this.normalizeStatus(order.status) === this.statusFilter);
+    }
+
+    this.orders = nextOrders;
+  }
+
+  private isWithinDateRange(createdAt: string, from: string, to: string): boolean {
+    const createdDateOnly = this.extractDateOnly(createdAt);
+    if (!createdDateOnly) {
+      return false;
+    }
+
+    return createdDateOnly >= from && createdDateOnly <= to;
+  }
+
+  private extractDateOnly(createdAt: string): string {
+    const value = (createdAt || '').toString();
+    const match = value.match(/^\d{4}-\d{2}-\d{2}/);
+    return match ? match[0] : '';
   }
 }
