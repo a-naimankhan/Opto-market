@@ -1,6 +1,6 @@
 export default `<!DOCTYPE html><html lang="en" data-beasties-container><head>
   <meta charset="utf-8">
-  <title>OptomarketFront</title>
+  <title>Optomarket</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -9,6 +9,6 @@ export default `<!DOCTYPE html><html lang="en" data-beasties-container><head>
 </script><script>window.__jsaction_bootstrap(document.body,"ng",["click"],[]);</script>
   <app-root ng-version="21.2.8" _nghost-ng-c3217246007 ngh="2" ng-server-context="ssg"><router-outlet _ngcontent-ng-c3217246007></router-outlet><app-layout _nghost-ng-c1840663845 ngh="1"><div _ngcontent-ng-c1840663845 class="seller-shell"><aside _ngcontent-ng-c1840663845 class="sidebar"><div _ngcontent-ng-c1840663845 class="sidebar-brand"><span _ngcontent-ng-c1840663845 class="brand-icon">🛒</span><span _ngcontent-ng-c1840663845 class="brand-name">OptoMarket</span></div><nav _ngcontent-ng-c1840663845 class="sidebar-nav"><a _ngcontent-ng-c1840663845 routerlink="/seller/products" routerlinkactive="active" class="nav-item" href="/seller/products" jsaction="click:;"><span _ngcontent-ng-c1840663845 class="nav-icon">📦</span> Товары </a><a _ngcontent-ng-c1840663845 routerlink="/seller/categories" routerlinkactive="active" class="nav-item" href="/seller/categories" jsaction="click:;"><span _ngcontent-ng-c1840663845 class="nav-icon">🗂️</span> Категории </a><a _ngcontent-ng-c1840663845 routerlink="/seller/order" routerlinkactive="active" class="nav-item" href="/seller/order" jsaction="click:;"><span _ngcontent-ng-c1840663845 class="nav-icon">📋</span> Заказы </a><a _ngcontent-ng-c1840663845 routerlink="/seller/customer" routerlinkactive="active" class="nav-item" href="/seller/customer" jsaction="click:;"><span _ngcontent-ng-c1840663845 class="nav-icon">👥</span> Покупатели </a></nav><button _ngcontent-ng-c1840663845 class="logout-btn" jsaction="click:;"><span _ngcontent-ng-c1840663845>🚪</span> Выйти </button></aside><div _ngcontent-ng-c1840663845 class="main-area"><header _ngcontent-ng-c1840663845 class="topbar"><h1 _ngcontent-ng-c1840663845 class="page-title">Панель продавца</h1></header><main _ngcontent-ng-c1840663845 class="content"><router-outlet _ngcontent-ng-c1840663845></router-outlet><app-cart ngh="0"><p>cart works!</p></app-cart><!----></main></div></div></app-layout><!----><button _ngcontent-ng-c3217246007 type="button" class="back-home-btn" jsaction="click:;"> Назад на главную
 </button><!----></app-root>
-<script src="main-HMBIEO75.js" type="module"></script>
+<script src="main-SX2BOXEF.js" type="module"></script>
 
 <script id="ng-state" type="application/json">{"__nghData__":[{},{"c":{"33":[{"i":"c2314649723","r":1}]}},{"c":{"0":[{"i":"c1840663845","r":1}],"1":[{"i":"t14","r":1}]},"t":{"1":"t14"}}]}</script></body></html>`;

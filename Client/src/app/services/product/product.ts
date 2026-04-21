@@ -9,10 +9,13 @@ import { Category, Product, ProductListResponse } from '../../models/api.models'
 export class ProductService {
   constructor(private http: HttpClient) { }
 
-  getAllProduct(categoryId?: number | null, pageSize?: number, page?: number) {
+  getAllProduct(categoryId?: number | null, pageSize?: number, page?: number, isWithSale?: string) {
     const query: string[] = [];
     if (categoryId) {
       query.push(`category=${categoryId}`);
+    }
+    if (isWithSale) {
+      query.push(`is_with_sale=${isWithSale}`);
     }
     if (pageSize && pageSize > 0) {
       query.push(`page_size=${pageSize}`);
@@ -28,7 +31,7 @@ export class ProductService {
     return this.http.get<ProductListResponse>(url);
   }
 
- 
+
 
   getCategory() {
     return this.http.get<Category[]>(Constant.API_END_POINT + Constant.METHODS.GET_ALL_CATEGORY);
@@ -58,12 +61,15 @@ export class ProductService {
     if (obj.stock_quantity !== undefined && obj.stock_quantity !== null) {
       formData.append('stock_quantity', String(obj.stock_quantity));
     }
-    if (obj.unit) {
-      formData.append('unit', String(obj.unit));
-    }
-    if (imageFile) {
-      formData.append('image', imageFile);
-    }
+     if (obj.unit) {
+       formData.append('unit', String(obj.unit));
+     }
+     if (obj.is_with_sale !== undefined) {
+       formData.append('is_with_sale', String(obj.is_with_sale));
+     }
+     if (imageFile) {
+       formData.append('image', imageFile);
+     }
 
     return this.http.post<Product>(Constant.API_END_POINT + Constant.METHODS.CREATE_PRODUCT, formData);
   }

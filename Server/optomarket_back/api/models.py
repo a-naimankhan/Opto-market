@@ -35,6 +35,7 @@ class Product(models.Model):
     min_quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     stock_quantity = models.PositiveIntegerField(validators=[MinValueValidator(0)])
     unit = models.CharField(max_length=20, default='кг')
+    is_with_sale = models.BooleanField(default=False)
 
     objects = models.Manager() # Стандартный менеджер
     available = AvailableProductManager() # Кастомный менеджер

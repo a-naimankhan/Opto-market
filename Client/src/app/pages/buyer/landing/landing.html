@@ -67,6 +67,12 @@
 			<button
 				type="button"
 				class="filter-btn"
+				[class.active]="isShowingSales"
+				(click)="toggleSales()"
+			>Выгодные предложения</button>
+			<button
+				type="button"
+				class="filter-btn"
 				*ngFor="let cat of categories"
 				[class.active]="selectedCategoryId === cat.id"
 				(click)="filterByCategory(cat.id)"
@@ -81,9 +87,11 @@
 				<article class="product-card" *ngFor="let product of filteredProducts">
 					<div *ngIf="product.image" class="product-image">
 						<img [src]="product.image" [alt]="product.name" />
+						<div *ngIf="product.is_with_sale" class="sale-badge">Скидка</div>
 					</div>
 					<div *ngIf="!product.image" class="product-image placeholder">
 						📦
+						<div *ngIf="product.is_with_sale" class="sale-badge">Скидка</div>
 					</div>
 					<div class="product-info">
 						<h3>{{ product.name }}</h3>

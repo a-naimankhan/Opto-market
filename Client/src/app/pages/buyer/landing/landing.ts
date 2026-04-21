@@ -41,6 +41,7 @@ export class Landing implements OnInit, OnDestroy {
   orderSuccessMessage = '';
   isContactOpen = false;
   isClicked = false;
+  isShowingSales = false;
   private productsSubscription?: Subscription;
   private cartSubscription?: Subscription;
   private userSubscription?: Subscription;
@@ -96,7 +97,12 @@ export class Landing implements OnInit, OnDestroy {
   loadProducts(): void {
     this.productsSubscription?.unsubscribe();
 
-    this.productsSubscription = this.productService.getAllProduct(this.selectedCategoryId).subscribe({
+    let params: any = { categoryId: this.selectedCategoryId };
+    if (this.isShowingSales) {
+      params.is_with_sale = 'true';
+    }
+
+    this.productsSubscription = this.productService.getAllProduct(params.categoryId, undefined, undefined, params.is_with_sale).subscribe({
       next: (response) => {
         if (response && response.results) {
           this.products = response.results;
@@ -225,5 +231,11 @@ export class Landing implements OnInit, OnDestroy {
 
   toggleProductList(): void {
     this.isClicked = !this.isClicked;
+  }
+
+  toggleSales(): void {
+    this.isShowingSales = !this.isShowingSales;
+    this.selectedCategoryId = null; // Reset category filter
+    this.loadProducts();
   }
 }

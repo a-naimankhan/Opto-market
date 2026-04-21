@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            
+
         </div>
     </div>
     <div class="col-4" *ngIf="isSidePanelVisible">
@@ -58,7 +58,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="card-body">
                 <div class="row">
                     <div class="col-6">
@@ -72,7 +72,7 @@
                             <option *ngFor="let category of categoryList" [ngValue]="category.id">{{ category.name }}</option>
                         </select>
             </div>
-            
+
             <div class="col-6">
                         <label for="">Цена</label>
                         <input type="number" class="form-control" [(ngModel)]="productObj.price" name="price" min="0">
@@ -81,7 +81,7 @@
                         <label for="">Количество на складе</label>
                         <input type="number" class="form-control" [(ngModel)]="productObj.stock_quantity" name="stockQuantity" min="0">
             </div>
-            
+
             <div class="col-6">
                         <label for="">Минимальный объем заказа</label>
                         <input type="number" class="form-control" [(ngModel)]="productObj.min_quantity" name="minQuantity" min="1">
@@ -98,11 +98,19 @@
                         <label for="">Телефон продавца</label>
                         <input type="text" class="form-control" [(ngModel)]="productObj.seller_phone" name="sellerPhone">
             </div>
-            <div class="col-12 mt-2">
-                        <label for="productImage">Фото товара</label>
-                        <input id="productImage" type="file" accept="image/*" class="form-control" (change)="onImageSelected($event)">
-            </div>
-            </div>
+             <div class="col-12 mt-2">
+                         <label for="productImage">Фото товара</label>
+                         <input id="productImage" type="file" accept="image/*" class="form-control" (change)="onImageSelected($event)">
+             </div>
+             <div class="col-12 mt-3">
+                         <div class="form-check">
+                             <input class="form-check-input" type="checkbox" id="isWithSale" [(ngModel)]="productObj.is_with_sale" name="is_with_sale">
+                             <label class="form-check-label" for="isWithSale">
+                                 Выгодные предложения (со скидкой)
+                             </label>
+                         </div>
+             </div>
+             </div>
             <div class="row">
         <div class="col-12 mt-3">
                         <button class="btn btn-success " (click)="onSave()">Добавить</button>
@@ -114,7 +122,7 @@
 </div>
 </div>
 
-</div>   
-    
+</div>
+
 
 

@@ -69,7 +69,7 @@ class ProductList(APIView):
         if self.request.method == 'GET':
             return [AllowAny()]
         return [IsAuthenticated()]
-         
+
     def get(self, request):
         # Показываем доступные товары всем пользователям
         products = Product.available.annotate(
@@ -83,6 +83,11 @@ class ProductList(APIView):
                 products = products.filter(category_id=int(category_id))
             except (TypeError, ValueError):
                 pass
+
+        # Filter by sale status
+        is_with_sale = request.query_params.get('is_with_sale')
+        if is_with_sale and is_with_sale.lower() in ['true', '1', 'yes']:
+            products = products.filter(is_with_sale=True)
 
         paginator = PageNumberPagination()
         # defaults
@@ -433,6 +438,22 @@ class ProductDetail(APIView):
                 return Response({'error': 'Вы можете удалять только свои товары'}, status=status.HTTP_403_FORBIDDEN)
             product.delete()
             return Response(status=204)
+        except Product.DoesNotExist:
+            return Response({'error': 'Товар не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+    def patch(self, request, pk):
+        """Update product fields (including is_with_sale)"""
+        try:
+            product = Product.objects.get(pk=pk)
+            # Проверяем, что пользователь является владельцем товара
+            if product.owner != request.user:
+                return Response({'error': 'Вы можете редактировать только свои товары'}, status=status.HTTP_403_FORBIDDEN)
+
+            serializer = ProductSerializer(product, data=request.data, partial=True, context={'request': request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Product.DoesNotExist:
             return Response({'error': 'Товар не найден'}, status=status.HTTP_404_NOT_FOUND)
 

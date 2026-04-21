@@ -232,6 +232,7 @@
 	align-items: center;
 	justify-content: center;
 	background: #f9f9f9;
+	position: relative;
 }
 
 .product-image img {
@@ -244,6 +245,22 @@
 .product-image.placeholder {
 	font-size: 64px;
 	background: #e8f5e9;
+}
+
+.sale-badge {
+	position: absolute;
+	top: -8px;
+	left: -8px;
+	background: #4CAF50;
+	color: white;
+	padding: 6px 12px;
+	border-radius: 4px;
+	font-weight: 700;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+	z-index: 10;
 }
 
 .product-info {

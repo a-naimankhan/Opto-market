@@ -18,10 +18,10 @@ export class Products implements OnInit, OnDestroy {
   private refreshTimerId: ReturnType<typeof setInterval> | null = null;
 
 
-  
 
-  
-  isSidePanelVisible: boolean = false; 
+
+
+  isSidePanelVisible: boolean = false;
   isProductsLoaded: boolean = false;
   productsLoadError: string | null = null;
   selectedImageFile: File | null = null;
@@ -34,6 +34,7 @@ export class Products implements OnInit, OnDestroy {
     min_quantity: 1,
     stock_quantity: 0,
     unit: 'кг',
+    is_with_sale: false,
   } as Product
 
     categoryList: Category[] = [];
@@ -136,6 +137,7 @@ export class Products implements OnInit, OnDestroy {
       min_quantity: 1,
       stock_quantity: 0,
       unit: 'кг',
+      is_with_sale: false,
     };
   }
 
