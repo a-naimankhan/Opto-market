@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Constant } from './constant/constant';
 import { Category, Product, ProductListResponse } from '../../models/api.models';
@@ -9,7 +9,7 @@ import { Category, Product, ProductListResponse } from '../../models/api.models'
 export class ProductService {
   constructor(private http: HttpClient) { }
 
-  getAllProduct(categoryId?: number | null, pageSize?: number, page?: number, isWithSale?: string) {
+  getAllProduct(categoryId?: number | null, pageSize?: number, page?: number, isWithSale?: string, owner?: string) {
     const query: string[] = [];
     if (categoryId) {
       query.push(`category=${categoryId}`);
@@ -23,12 +23,17 @@ export class ProductService {
     if (page && page > 0) {
       query.push(`page=${page}`);
     }
+    if (owner) {
+      query.push(`owner=${owner}`);
+    }
 
     let url = Constant.API_END_POINT + Constant.METHODS.GET_ALL_PRODUCT;
     if (query.length) {
       url += `?${query.join('&')}`;
     }
-    return this.http.get<ProductListResponse>(url);
+    return this.http.get<ProductListResponse>(url, {
+      headers: this.getAuthHeaders(),
+    });
   }
 
 
@@ -115,5 +120,14 @@ export class ProductService {
     }
 
     return this.http.patch<Product>(`${Constant.API_END_POINT}products/${productId}/`, formData);
+  }
+
+  private getAuthHeaders(): HttpHeaders | undefined {
+    const token =
+      typeof window !== 'undefined' && window?.localStorage
+        ? window.localStorage.getItem('access_token')
+        : null;
+
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
   }
 }

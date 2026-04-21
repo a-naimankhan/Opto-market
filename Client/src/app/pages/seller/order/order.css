@@ -46,7 +46,7 @@
 }
 
 .filter-field input,
-.status-row select {
+.modal-field select {
 	height: 38px;
 	border: 1px solid #ccd8e6;
 	border-radius: 9px;
@@ -57,15 +57,25 @@
 }
 
 .apply-btn,
-.save-btn {
+.save-btn,
+.secondary-btn {
 	border: none;
 	border-radius: 10px;
 	padding: 10px 14px;
-	background: #1f6feb;
-	color: #fff;
 	cursor: pointer;
 	font-weight: 700;
 	transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.apply-btn,
+.save-btn {
+	background: #1f6feb;
+	color: #fff;
+}
+
+.secondary-btn {
+	background: #eef3f9;
+	color: #29496d;
 }
 
 .apply-btn:hover,
@@ -74,10 +84,22 @@
 	transform: translateY(-1px);
 }
 
+.secondary-btn:hover {
+	background: #dde8f4;
+	transform: translateY(-1px);
+}
+
 .apply-btn:disabled {
 	background: #8fb4eb;
 	cursor: not-allowed;
 	transform: none;
+}
+
+.save-btn:disabled,
+.secondary-btn:disabled {
+	cursor: not-allowed;
+	transform: none;
+	opacity: 0.7;
 }
 
 .orders-list {
@@ -118,13 +140,60 @@
 .status-row {
 	margin-top: 10px;
 	display: flex;
-	gap: 8px;
-	align-items: center;
 }
 
-.status-row select {
-	min-width: 190px;
-	flex: 1;
+.modal-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(15, 23, 42, 0.46);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	z-index: 1000;
+}
+
+.status-modal {
+	width: min(100%, 420px);
+	background: #fff;
+	border-radius: 16px;
+	padding: 20px;
+	box-shadow: 0 24px 56px rgba(15, 23, 42, 0.24);
+}
+
+.status-modal h3 {
+	margin: 0 0 8px;
+	color: #123765;
+	font-size: 22px;
+}
+
+.modal-order {
+	margin: 0 0 16px;
+	color: #52657c;
+}
+
+.modal-field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #3a4a5f;
+}
+
+.modal-field select {
+	width: 100%;
+}
+
+.modal-error {
+	margin: 14px 0 0;
+}
+
+.modal-actions {
+	margin-top: 16px;
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
 }
 
 .error,
@@ -159,12 +228,9 @@
 	}
 
 	.status-row,
-	.filters {
+	.filters,
+	.modal-actions {
 		flex-direction: column;
 		align-items: stretch;
-	}
-
-	.status-row select {
-		min-width: 0;
 	}
 }

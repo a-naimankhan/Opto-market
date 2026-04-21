@@ -13,11 +13,14 @@ import { OrderService } from '../../../services/order/order';
 export class Order implements OnInit {
   allOrders: OrderItem[] = [];
   orders: OrderItem[] = [];
-  draftStatuses: Record<number, Exclude<OrderStatus, 'accepted'>> = {};
   dateFrom = '';
   dateTo = '';
   isLoading = false;
+  isUpdatingStatus = false;
   errorMessage = '';
+  modalErrorMessage = '';
+  selectedOrder: OrderItem | null = null;
+  selectedStatus: Exclude<OrderStatus, 'accepted'> = 'pending_payment';
   private hasAppliedDateRange = false;
 
   readonly sellerStatuses: Array<Exclude<OrderStatus, 'accepted'>> = ['pending_payment', 'paid', 'delivered'];
@@ -55,7 +58,10 @@ export class Order implements OnInit {
       .getOrders()
       .subscribe({
         next: (orders) => {
-          this.allOrders = orders;
+          this.allOrders = orders.map((order) => ({
+            ...order,
+            status: this.normalizeStatus(order.status),
+          }));
           this.applyCurrentFilters();
           this.isLoading = false;
         },
@@ -68,19 +74,39 @@ export class Order implements OnInit {
       });
   }
 
-  saveStatus(order: OrderItem): void {
-    const nextStatus = this.draftStatuses[order.id];
-    if (!nextStatus) {
+  openStatusModal(order: OrderItem): void {
+    this.selectedOrder = order;
+    this.selectedStatus = this.asSellerStatus(order.status);
+    this.modalErrorMessage = '';
+  }
+
+  closeStatusModal(): void {
+    if (this.isUpdatingStatus) {
       return;
     }
 
-    this.orderService.updateStatus(order.id, nextStatus).subscribe({
-      next: (updatedOrder) => {
-        this.allOrders = this.allOrders.map((entry) => (entry.id === updatedOrder.id ? updatedOrder : entry));
-        this.applyCurrentFilters();
+    this.selectedOrder = null;
+    this.modalErrorMessage = '';
+  }
+
+  confirmStatusUpdate(): void {
+    if (!this.selectedOrder || this.isUpdatingStatus) {
+      return;
+    }
+
+    this.isUpdatingStatus = true;
+    this.modalErrorMessage = '';
+    this.errorMessage = '';
+
+    this.orderService.updateStatus(this.selectedOrder.id, this.selectedStatus).subscribe({
+      next: () => {
+        this.isUpdatingStatus = false;
+        this.closeStatusModal();
+        this.loadOrders();
       },
       error: () => {
-        this.errorMessage = 'Не удалось обновить статус заказа.';
+        this.isUpdatingStatus = false;
+        this.modalErrorMessage = 'Не удалось обновить статус заказа.';
       },
     });
   }
@@ -113,10 +139,6 @@ export class Order implements OnInit {
     }
 
     this.orders = nextOrders;
-    this.draftStatuses = {};
-    for (const order of nextOrders) {
-      this.draftStatuses[order.id] = this.asSellerStatus(order.status);
-    }
   }
 
   private isWithinDateRange(createdAt: string, from: string, to: string): boolean {
@@ -132,5 +154,19 @@ export class Order implements OnInit {
     const value = (createdAt || '').toString();
     const match = value.match(/^\d{4}-\d{2}-\d{2}/);
     return match ? match[0] : '';
+  }
+
+  private normalizeStatus(status: string): OrderStatus {
+    const value = (status || '').toString().trim().toLowerCase();
+    if (value === 'accepted' || value === 'заказ принят') {
+      return 'accepted';
+    }
+    if (value === 'pending_payment' || value === 'pending' || value === 'ожидает оплаты') {
+      return 'pending_payment';
+    }
+    if (value === 'paid' || value === 'оплачено') {
+      return 'paid';
+    }
+    return 'delivered';
   }
 }

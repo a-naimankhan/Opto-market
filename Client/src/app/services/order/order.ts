@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CheckoutPayload, OrderItem, OrderStatus, ProductReview, ProductReviewPayload } from '../../models/api.models';
@@ -33,12 +33,15 @@ export class OrderService {
       params = params.set('status', filters.status);
     }
 
-    return this.http.get<OrderItem[]>(Constant.API_END_POINT + Constant.METHODS.ORDERS, { params });
+    return this.http.get<OrderItem[]>(Constant.API_END_POINT + Constant.METHODS.ORDERS, {
+      params,
+      headers: this.getAuthHeaders(),
+    });
   }
 
   updateStatus(orderId: number, status: Exclude<OrderStatus, 'accepted'>): Observable<OrderItem> {
     const url = `${Constant.API_END_POINT}${Constant.METHODS.ORDERS}${orderId}/status/`;
-    return this.http.patch<OrderItem>(url, { status });
+    return this.http.patch<OrderItem>(url, { status }, { headers: this.getAuthHeaders() });
   }
 
   getProductReviews(productId: number): Observable<ProductReview[]> {
@@ -49,5 +52,14 @@ export class OrderService {
   submitProductReview(productId: number, payload: ProductReviewPayload): Observable<ProductReview> {
     const url = `${Constant.API_END_POINT}${Constant.METHODS.GET_ALL_PRODUCT}${productId}/reviews/`;
     return this.http.post<ProductReview>(url, payload);
+  }
+
+  private getAuthHeaders(): HttpHeaders | undefined {
+    const token =
+      typeof window !== 'undefined' && window?.localStorage
+        ? window.localStorage.getItem('access_token')
+        : null;
+
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
   }
 }

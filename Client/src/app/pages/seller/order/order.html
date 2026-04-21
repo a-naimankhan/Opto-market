@@ -38,14 +38,34 @@
 				<p>Текущий статус: <strong>{{ statusLabel(order.status) }}</strong></p>
 
 				<div class="status-row">
-					<select [(ngModel)]="draftStatuses[order.id]">
-						<option *ngFor="let status of sellerStatuses" [value]="status">{{ statusLabel(status) }}</option>
-					</select>
-					<button type="button" class="save-btn" (click)="saveStatus(order)">Сохранить статус</button>
+					<button type="button" class="save-btn" (click)="openStatusModal(order)">Изменить статус</button>
 				</div>
 			</div>
 		</article>
 	</div>
 
 	<p class="info" *ngIf="!isLoading && !orders.length">Заказов пока нет.</p>
+
+	<div class="modal-backdrop" *ngIf="selectedOrder" (click)="closeStatusModal()">
+		<div class="status-modal" (click)="$event.stopPropagation()">
+			<h3>Изменить статус заказа</h3>
+			<p class="modal-order">Заказ № {{ selectedOrder.order_number }}</p>
+
+			<label class="modal-field">
+				Статус
+				<select [(ngModel)]="selectedStatus" name="selectedStatus">
+					<option *ngFor="let status of sellerStatuses" [value]="status">{{ statusLabel(status) }}</option>
+				</select>
+			</label>
+
+			<p class="error modal-error" *ngIf="modalErrorMessage">{{ modalErrorMessage }}</p>
+
+			<div class="modal-actions">
+				<button type="button" class="secondary-btn" (click)="closeStatusModal()" [disabled]="isUpdatingStatus">Отмена</button>
+				<button type="button" class="save-btn" (click)="confirmStatusUpdate()" [disabled]="isUpdatingStatus">
+					{{ isUpdatingStatus ? 'Сохранение...' : 'Подтвердить' }}
+				</button>
+			</div>
+		</div>
+	</div>
 </section>

@@ -22,7 +22,7 @@ export class Products implements OnInit, OnDestroy {
 
 
 
-  isSidePanelVisible: boolean = false;
+  isEditModalOpen = false;
   isProductsLoaded: boolean = false;
   productsLoadError: string | null = null;
   selectedImageFile: File | null = null;
@@ -67,7 +67,7 @@ export class Products implements OnInit, OnDestroy {
   getProducts() {
     this.isProductsLoaded = false;
     this.productsLoadError = null;
-    this.productSrv.getAllProduct(null, 48).subscribe({
+    this.productSrv.getAllProduct(null, 48, undefined, undefined, 'me').subscribe({
       next: (res) => {
         this.productsList = res.results ?? [];
         this.isProductsLoaded = true;
@@ -148,13 +148,13 @@ export class Products implements OnInit, OnDestroy {
 
   openSidePanel() {
     this.editingProductId = null;
-    this.isSidePanelVisible = true;
+    this.isEditModalOpen = true;
     this.resetProductForm();
   }
 
   editProduct(product: Product): void {
     this.editingProductId = product.id;
-    this.isSidePanelVisible = true;
+    this.isEditModalOpen = true;
     this.selectedImageFile = null;
     this.productObj = {
       ...product,
@@ -168,7 +168,7 @@ export class Products implements OnInit, OnDestroy {
   }
 
   closeSidePanel() {
-    this.isSidePanelVisible = false;
+    this.isEditModalOpen = false;
     this.editingProductId = null;
     this.selectedImageFile = null;
     this.resetProductForm();
