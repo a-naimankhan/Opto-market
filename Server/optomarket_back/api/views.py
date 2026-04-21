@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.utils import timezone
 from rest_framework.decorators import APIView, api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
@@ -75,8 +75,6 @@ def user_profile(request):
             'email': user.email,
             'role': profile.role
         })
-from rest_framework.permissions import IsAuthenticated
-
 # 1. CBV для списка и создания (Full CRUD)
 class ProductList(APIView):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
