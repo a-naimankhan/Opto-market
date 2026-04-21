@@ -23,6 +23,7 @@ export interface Product {
   stock_quantity: number;
   unit: string;
   is_with_sale?: boolean;
+  discount_percent?: number;
   avg_rating?: number | null;
   reviews_count?: number;
 }

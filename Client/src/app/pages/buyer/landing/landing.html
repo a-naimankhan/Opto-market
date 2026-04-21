@@ -105,7 +105,14 @@
 							<span class="rating-value">{{ getAverageRating(product) | number: '1.1-1' }}</span>
 							<span class="rating-count">({{ getReviewsCount(product) }})</span>
 						</div>
-						<p class="price">KZT{{ product.price }}</p>
+            <p class="price">
+            <ng-container *ngIf="product.is_with_sale && (product.discount_percent ?? 0) > 0; else regularPrice">
+              <span class="price-new">KZT{{ discountedPrice(product) | number: '1.2-2' }}</span>
+            </ng-container>
+            <ng-template #regularPrice>
+              KZT{{ product.price | number: '1.2-2' }}
+            </ng-template>
+          </p>
 						<p class="stock">В наличии: {{ product.stock_quantity }}</p>
 						<button type="button" (click)="addToCart(product)">В корзину</button>
 					</div>

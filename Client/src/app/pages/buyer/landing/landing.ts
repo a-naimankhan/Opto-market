@@ -40,7 +40,7 @@ export class Landing implements OnInit, OnDestroy {
   isProfileOpen = false;
   orderSuccessMessage = '';
   isContactOpen = false;
-  isClicked = false;
+  isClicked = true;
   isShowingSales = false;
   private productsSubscription?: Subscription;
   private cartSubscription?: Subscription;
@@ -162,6 +162,15 @@ export class Landing implements OnInit, OnDestroy {
 
   getReviewsCount(product: Product): number {
     return product.reviews_count ?? 0;
+  }
+
+  discountedPrice(product: Product): number {
+    const price = Number(product.price || 0);
+    const discount = Number(product.discount_percent || 0);
+    if (!product.is_with_sale || discount <= 0) {
+      return price;
+    }
+    return Math.max(0, price - (price * discount) / 100);
   }
 
   addToCart(product: Product): void {

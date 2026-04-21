@@ -33,10 +33,26 @@
                                 </div>
                                 <h4 class="card-title">{{ product.name }}</h4>
                                 <p class="card-text mb-1"><strong>Категория:</strong> {{ categoryNameById(product.category) }}</p>
-                                <p class="card-text mb-1"><strong>Цена:</strong> {{ product.price }} KZT / {{ product.unit }}</p>
+                                <p class="card-text mb-1" *ngIf="product.is_with_sale && (product.discount_percent ?? 0) > 0">
+                                    <span class="sale-badge">Скидка {{ product.discount_percent }}%</span>
+                                </p>
+                                <p class="card-text mb-1">
+                                    <strong>Цена:</strong>
+                                    <ng-container *ngIf="product.is_with_sale && (product.discount_percent ?? 0) > 0; else regularPrice">
+                                        <span class="price-old">{{ product.price | number: '1.2-2' }}</span>
+                                        <span class="price-new">{{ discountedPrice(product) | number: '1.2-2' }}</span>
+                                        KZT / {{ product.unit }}
+                                    </ng-container>
+                                    <ng-template #regularPrice>
+                                        {{ product.price | number: '1.2-2' }} KZT / {{ product.unit }}
+                                    </ng-template>
+                                </p>
                                 <p class="card-text mb-1"><strong>Остаток:</strong> {{ product.stock_quantity }}</p>
                                 <p class="card-text mb-1"><strong>Мин. заказ:</strong> {{ product.min_quantity }}</p>
                                 <p class="card-text mb-0"><strong>Продавец:</strong> {{ product.seller_name }} {{ product.seller_phone }}</p>
+                                <div class="mt-2" *ngIf="currentSellerId && product.owner === currentSellerId">
+                                    <button class="btn btn-sm btn-outline-primary" (click)="editProduct(product)">Редактировать</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -51,7 +67,7 @@
             <div class="card-header bg-primary">
                 <div class="row">
                     <div class="col-6">
-                        Новый товар
+                        {{ editingProductId ? 'Редактировать товар' : 'Новый товар' }}
                     </div>
                     <div class="col-6 text-end">
                         <button class="btn btn-sm btn-success" (click)="closeSidePanel()">Закрыть</button>
@@ -110,10 +126,22 @@
                              </label>
                          </div>
              </div>
+             <div class="col-12 mt-2" *ngIf="productObj.is_with_sale">
+                         <label for="discountPercent">Процент скидки</label>
+                         <input
+                            id="discountPercent"
+                            type="number"
+                            class="form-control"
+                            [(ngModel)]="productObj.discount_percent"
+                            name="discount_percent"
+                            min="0"
+                            max="100"
+                         >
+             </div>
              </div>
             <div class="row">
         <div class="col-12 mt-3">
-                        <button class="btn btn-success " (click)="onSave()">Добавить</button>
+                        <button class="btn btn-success " (click)="onSave()">{{ editingProductId ? 'Сохранить' : 'Добавить' }}</button>
             </div>
 
 

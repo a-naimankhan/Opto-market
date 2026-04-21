@@ -26,6 +26,11 @@ class ProductSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Мин. заказ минимум 1")
         return value
 
+    def validate_discount_percent(self, value):
+        if value < 0 or value > 100:
+            raise serializers.ValidationError("Скидка должна быть в диапазоне 0..100")
+        return value
+
     class Meta:
         model = Product
         fields = '__all__'

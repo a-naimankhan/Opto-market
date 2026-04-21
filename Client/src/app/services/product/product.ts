@@ -67,10 +67,53 @@ export class ProductService {
      if (obj.is_with_sale !== undefined) {
        formData.append('is_with_sale', String(obj.is_with_sale));
      }
+     if (obj.discount_percent !== undefined && obj.discount_percent !== null) {
+       formData.append('discount_percent', String(obj.discount_percent));
+     }
      if (imageFile) {
        formData.append('image', imageFile);
      }
 
     return this.http.post<Product>(Constant.API_END_POINT + Constant.METHODS.CREATE_PRODUCT, formData);
+  }
+
+  updateProduct(productId: number, obj: Partial<Product>, imageFile?: File | null) {
+    const formData = new FormData();
+
+    if (obj.name !== undefined) {
+      formData.append('name', String(obj.name));
+    }
+    if (obj.category !== undefined) {
+      formData.append('category', String(obj.category));
+    }
+    if (obj.seller_name !== undefined) {
+      formData.append('seller_name', String(obj.seller_name));
+    }
+    if (obj.seller_phone !== undefined) {
+      formData.append('seller_phone', String(obj.seller_phone));
+    }
+    if (obj.price !== undefined && obj.price !== null) {
+      formData.append('price', String(obj.price));
+    }
+    if (obj.min_quantity !== undefined && obj.min_quantity !== null) {
+      formData.append('min_quantity', String(obj.min_quantity));
+    }
+    if (obj.stock_quantity !== undefined && obj.stock_quantity !== null) {
+      formData.append('stock_quantity', String(obj.stock_quantity));
+    }
+    if (obj.unit !== undefined) {
+      formData.append('unit', String(obj.unit));
+    }
+    if (obj.is_with_sale !== undefined) {
+      formData.append('is_with_sale', String(obj.is_with_sale));
+    }
+    if (obj.discount_percent !== undefined && obj.discount_percent !== null) {
+      formData.append('discount_percent', String(obj.discount_percent));
+    }
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+
+    return this.http.patch<Product>(`${Constant.API_END_POINT}products/${productId}/`, formData);
   }
 }

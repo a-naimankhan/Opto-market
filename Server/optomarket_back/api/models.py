@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 # Расширяем модель User
 class UserProfile(models.Model):
@@ -36,6 +36,11 @@ class Product(models.Model):
     stock_quantity = models.PositiveIntegerField(validators=[MinValueValidator(0)])
     unit = models.CharField(max_length=20, default='кг')
     is_with_sale = models.BooleanField(default=False)
+    discount_percent = models.PositiveIntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text="Скидка в процентах (0-100)",
+    )
 
     objects = models.Manager() # Стандартный менеджер
     available = AvailableProductManager() # Кастомный менеджер
