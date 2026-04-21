@@ -86,7 +86,7 @@ class ProductList(APIView):
         return [IsAuthenticated()]
          
     def get(self, request):
-        # mine=1 -> возвращаем только товары текущего продавца (включая 0 остаток)
+        # mine=1 → возвращаем только товары текущего продавца (включая 0 остаток)
         mine = request.query_params.get('mine') == '1'
         if mine and request.user.is_authenticated:
             products = Product.objects.filter(owner=request.user).annotate(
@@ -95,9 +95,9 @@ class ProductList(APIView):
             ).order_by('-id')
         else:
             products = Product.available.annotate(
-                avg_rating=Avg('reviews__rating'),
-                reviews_count=Count('reviews', distinct=True),
-            ).order_by('-id')
+            avg_rating=Avg('reviews__rating'),
+            reviews_count=Count('reviews', distinct=True),
+        ).order_by('-id')
 
         category_id = request.query_params.get('category')
         if not mine:
@@ -155,12 +155,68 @@ class ProductList(APIView):
 
 # 1.5 CBV для категорий
 class CategoryList(APIView):
-    permission_classes = [AllowAny]
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     def get(self, request):
         categories = Category.objects.order_by('id')
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
+
+    def post(self, request):
+        serializer = CategorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CategoryDetail(APIView):
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def _get_object(self, pk):
+        try:
+            return Category.objects.get(pk=pk)
+        except Category.DoesNotExist:
+            return None
+
+    def get(self, request, pk):
+        category = self._get_object(pk)
+        if category is None:
+            return Response({'error': 'Категория не найдена'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(CategorySerializer(category).data)
+
+    def put(self, request, pk):
+        category = self._get_object(pk)
+        if category is None:
+            return Response({'error': 'Категория не найдена'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = CategorySerializer(category, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        category = self._get_object(pk)
+        if category is None:
+            return Response({'error': 'Категория не найдена'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = CategorySerializer(category, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        category = self._get_object(pk)
+        if category is None:
+            return Response({'error': 'Категория не найдена'}, status=status.HTTP_404_NOT_FOUND)
+        category.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ProductReviewList(APIView):
