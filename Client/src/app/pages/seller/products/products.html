@@ -75,16 +75,16 @@
             
             <div class="col-6">
                         <label for="">Цена</label>
-                        <input type="number" class="form-control" [(ngModel)]="productObj.price" name="price">
+                        <input type="number" class="form-control" [(ngModel)]="productObj.price" name="price" min="0">
             </div>
             <div class="col-6">
                         <label for="">Количество на складе</label>
-                        <input type="number" class="form-control" [(ngModel)]="productObj.stock_quantity" name="stockQuantity">
+                        <input type="number" class="form-control" [(ngModel)]="productObj.stock_quantity" name="stockQuantity" min="0">
             </div>
             
             <div class="col-6">
                         <label for="">Минимальный объем заказа</label>
-                        <input type="number" class="form-control" [(ngModel)]="productObj.min_quantity" name="minQuantity">
+                        <input type="number" class="form-control" [(ngModel)]="productObj.min_quantity" name="minQuantity" min="1">
             </div>
             <div class="col-6">
                         <label for="">Единица измерения</label>

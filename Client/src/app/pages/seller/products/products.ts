@@ -34,7 +34,7 @@ export class Products implements OnInit, OnDestroy {
     min_quantity: 1,
     stock_quantity: 0,
     unit: 'кг',
-  }
+  } as Product
 
     categoryList: Category[] = [];
     productsList: Product[] = [];
@@ -81,6 +81,26 @@ export class Products implements OnInit, OnDestroy {
   }
 
   onSave() {
+    if ((this.productObj.price ?? 0) < 0) {
+      alert('Цена не может быть ниже 0');
+      return;
+    }
+
+    if ((this.productObj.stock_quantity ?? 0) < 0) {
+      alert('Остаток не может быть ниже 0');
+      return;
+    }
+
+    if ((this.productObj.min_quantity ?? 0) < 1) {
+      alert('Минимальный заказ должен быть минимум 1');
+      return;
+    }
+
+    if (!this.productObj.name || !this.productObj.category) {
+      alert('Заполните обязательные поля (название и категория)');
+      return;
+    }
+
     this.productSrv.saveProduct(this.productObj, this.selectedImageFile).subscribe({
       next: () => {
         alert('Товар успешно добавлен');

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 
 # Расширяем модель User
 class UserProfile(models.Model):
@@ -30,9 +31,9 @@ class Product(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE) # ForeignKey 2 (Фермер)
     seller_name = models.CharField(max_length=255, blank=True)
     seller_phone = models.CharField(max_length=20, blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    min_quantity = models.PositiveIntegerField(default=1)
-    stock_quantity = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    min_quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
+    stock_quantity = models.PositiveIntegerField(validators=[MinValueValidator(0)])
     unit = models.CharField(max_length=20, default='кг')
 
     objects = models.Manager() # Стандартный менеджер
