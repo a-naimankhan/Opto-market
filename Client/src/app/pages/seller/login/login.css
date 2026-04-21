@@ -134,3 +134,12 @@ button{
 .social i{
   margin-right: 4px;
 }
+
+.social .go {
+    cursor: pointer;
+}
+
+#register-role option {
+    color:black;
+    background: white;
+}
