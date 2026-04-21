@@ -11,6 +11,21 @@ class ProductSerializer(serializers.ModelSerializer):
     avg_rating = serializers.FloatField(read_only=True, default=0)
     reviews_count = serializers.IntegerField(read_only=True, default=0)
 
+    def validate_price(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Цена не может быть меньше 0")
+        return value
+
+    def validate_stock_quantity(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Остаток не может быть меньше 0")
+        return value
+
+    def validate_min_quantity(self, value):
+        if value < 1:
+            raise serializers.ValidationError("Мин. заказ минимум 1")
+        return value
+
     class Meta:
         model = Product
         fields = '__all__'
@@ -19,9 +34,12 @@ class ProductSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         request = self.context.get('request')
+
         image_url = data.get('image')
+
         if request and image_url and image_url.startswith('/'):
             data['image'] = request.build_absolute_uri(image_url)
+
         return data
 
 
