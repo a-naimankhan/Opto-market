@@ -1,6 +1,6 @@
 export default `<!DOCTYPE html><html lang="en" data-beasties-container><head>
   <meta charset="utf-8">
-  <title>OptomarketFront</title>
+  <title>Optomarket</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -9,6 +9,6 @@ export default `<!DOCTYPE html><html lang="en" data-beasties-container><head>
 </script><script>window.__jsaction_bootstrap(document.body,"ng",["click"],[]);</script>
   <app-root ng-version="21.2.8" _nghost-ng-c3217246007 ngh="1" ng-server-context="ssg"><router-outlet _ngcontent-ng-c3217246007></router-outlet><app-category-products ngh="0"><p>category-products works!</p></app-category-products><!----><button _ngcontent-ng-c3217246007 type="button" class="back-home-btn" jsaction="click:;"> Назад на главную
 </button><!----></app-root>
-<script src="main-HMBIEO75.js" type="module"></script>
+<script src="main-WIWBB32A.js" type="module"></script>
 
-<script id="ng-state" type="application/json">{"__nghData__":[{},{"c":{"0":[{"i":"c2313226752","r":1}],"1":[{"i":"t2","r":1}]},"t":{"1":"t2"}}]}</script></body></html>`;
+<script id="ng-state" type="application/json">{"__nghData__":[{},{"c":{"0":[{"i":"c2313226752","r":1}],"1":[{"i":"t15","r":1}]},"t":{"1":"t15"}}]}</script></body></html>`;

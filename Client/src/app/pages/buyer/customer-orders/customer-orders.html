@@ -38,7 +38,17 @@
 				<p>Количество: {{ order.quantity }}</p>
 				<p>Сумма: {{ order.total_price | number: '1.2-2' }}</p>
 				<p>Статус: <strong>{{ statusLabel(order.status) }}</strong></p>
+				<button type="button" class="chat-toggle-btn" (click)="toggleChat(order.id)">
+					💬 {{ activeChatOrderId === order.id ? 'Скрыть чат' : 'Написать продавцу' }}
+				</button>
 			</div>
+			<app-chat-window
+				*ngIf="activeChatOrderId === order.id && currentUserId"
+				[buyerId]="currentUserId"
+				[sellerId]="order.product.owner"
+				[currentUserId]="currentUserId"
+				[title]="'Чат с продавцом'"
+			></app-chat-window>
 			<div class="review-block">
 				<h4>Ваш отзыв по заказу</h4>
 				<div class="review-fields">

@@ -29,6 +29,10 @@
   <div class="main-area">
     <header class="topbar">
       <h1 class="page-title">Панель продавца</h1>
+      <button class="chat-navbar-btn" type="button" (click)="openCustomerChats()">
+        💬 Чаты
+        <span class="chat-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </button>
     </header>
 
     <main class="content">

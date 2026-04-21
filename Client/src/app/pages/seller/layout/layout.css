@@ -112,6 +112,7 @@
   border-bottom: 1px solid #69ae09;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .page-title {
@@ -119,6 +120,34 @@
   font-weight: 600;
   color: #ffffff;
   margin: 0;
+}
+
+.chat-navbar-btn {
+  position: relative;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #49740f;
+  font-weight: 700;
+  padding: 0 14px;
+  cursor: pointer;
+}
+
+.chat-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #e12525;
+  color: #fff;
+  border-radius: 999px;
+  min-width: 18px;
+  height: 18px;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
 }
 
 /* === Content === */

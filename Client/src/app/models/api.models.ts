@@ -100,3 +100,17 @@ export interface ProductReviewPayload {
   rating: number;
   comment: string;
 }
+
+export interface ChatMessage {
+  message: string;
+  sender_id: number;
+  receiver_id: number;
+  timestamp: string;
+  room_name: string;
+}
+
+export interface ChatConnectionState {
+  connected: boolean;
+  roomName: string | null;
+  error: string | null;
+}

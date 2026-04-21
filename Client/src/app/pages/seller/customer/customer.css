@@ -77,6 +77,17 @@
 	color: #2c4217;
 }
 
+.chat-toggle-btn {
+	height: 34px;
+	border: none;
+	border-radius: 8px;
+	background: #4e87ff;
+	color: #fff;
+	font-weight: 600;
+	cursor: pointer;
+	margin-top: 4px;
+}
+
 .orders-table-wrap {
 	overflow-x: auto;
 }

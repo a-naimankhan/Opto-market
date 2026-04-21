@@ -45,8 +45,11 @@ CORS_ALLOW_CREDENTIALS = True
 
 INSTALLED_APPS = [
     "api",
+    "chat",
+    "daphne",
     "rest_framework",
     "rest_framework_simplejwt",
+    "channels",
     'corsheaders',
     "django.contrib.admin",
     "django.contrib.auth",
@@ -87,6 +90,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "optomarket_back.wsgi.application"
+ASGI_APPLICATION = "optomarket_back.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
 
 
 # Database

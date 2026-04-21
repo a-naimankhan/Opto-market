@@ -4,25 +4,37 @@
 
 		<nav class="menu">
 			<div class="menu-item categories">
-				<button type="button" class="menu-btn">КАТЕГОРИИ</button>
-				<ul class="dropdown">
+				<button
+					type="button"
+					class="menu-btn"
+					(click)="toggleCategoriesMenu()"
+					[attr.aria-expanded]="isCategoriesOpen"
+				>КАТЕГОРИИ</button>
+				<ul class="dropdown" [class.open]="isCategoriesOpen">
 					<li
 						*ngFor="let category of categories"
-						(click)="filterByCategory(category.id)"
-						[class.active-cat]="selectedCategoryId === category.id"
-					>{{ category.name }}</li>
+					>
+						<button
+							type="button"
+							class="dropdown-btn"
+							(click)="selectCategoryFromMenu(category.id)"
+							[class.active-cat]="selectedCategoryId === category.id"
+						>{{ category.name }}</button>
+					</li>
 				</ul>
 			</div>
 
-			<button type="button" class="menu-btn">Выгодные предложения</button>
+			<button type="button" class="menu-btn">ВЫГОДНЫЕ ПРЕДЛОЖЕНИЯ</button>
 			<button type="button" class="menu-btn" (click)="openContact()">СВЯЗАТЬСЯ</button>
-
+			
 			<button type="button" class="icon-btn cart-btn" aria-label="Cart" (click)="openCartSidebar()">
-				<img src="assets/icons/cart.png" alt="Cart" class="cart-icon">
+				<i class="bi bi-bag icon-glyph" aria-hidden="true"></i>
 				<span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
 			</button>
 			<div class="menu-item profile-menu">
-				<button type="button" class="icon-btn" aria-label="Profile" (click)="toggleProfilePanel()">П</button>
+				<button type="button" class="icon-btn" aria-label="Profile" (click)="toggleProfilePanel()">
+					<i class="bi bi-person-circle icon-glyph" aria-hidden="true"></i>
+				</button>
 				<div class="profile-dropdown" *ngIf="isProfileOpen">
 					<div *ngIf="currentUser; else guestProfile" class="profile-content">
 						<p><strong>{{ currentUser.username }}</strong></p>
@@ -44,6 +56,8 @@
 	</header>
 
 	<main class="content">
+		<p class="load-error" *ngIf="categoriesError">{{ categoriesError }}</p>
+		<p class="load-error" *ngIf="productsError">{{ productsError }}</p>
 		<div class="order-success" *ngIf="orderSuccessMessage">
 			<span>{{ orderSuccessMessage }}</span>
 			<button type="button" (click)="closeOrderSuccessMessage()">x</button>
@@ -61,8 +75,8 @@
 			<button
 				type="button"
 				class="filter-btn"
-				[class.active]="isClicked"
-				(click)="toggleProductList()"
+				[class.active]="selectedCategoryId === null"
+				(click)="filterByCategory(null)"
 			>Все товары</button>
 			<button
 				type="button"
@@ -73,39 +87,34 @@
 			>{{ cat.name }}</button>
 		</section>
 
-		<section
-			class="cards-row"
-			[@slideInOut]="isClicked ? 'in' : 'out'"
-		>
-			<ng-container *ngIf="filteredProducts.length; else noProducts">
-				<article class="product-card" *ngFor="let product of filteredProducts">
-					<div *ngIf="product.image" class="product-image">
-						<img [src]="product.image" [alt]="product.name" />
+		<section class="cards-row" [class.is-filtering]="isFiltering" *ngIf="filteredProducts.length; else noProducts">
+			<article class="product-card" *ngFor="let product of filteredProducts">
+				<div *ngIf="product.image" class="product-image">
+					<img [src]="product.image" [alt]="product.name" />
+				</div>
+				<div *ngIf="!product.image" class="product-image placeholder">
+					📦
+				</div>
+				<div class="product-info">
+					<h3>{{ product.name }}</h3>
+					<p class="seller">Продавец: {{ product.seller_name }}</p>
+					<div class="stars" [attr.aria-label]="'Рейтинг ' + (getAverageRating(product) | number: '1.1-1')">
+						<span
+							*ngFor="let star of starScale"
+							class="star"
+							[class.filled]="star <= getRoundedRating(product)"
+						>★</span>
+						<span class="rating-value">{{ getAverageRating(product) | number: '1.1-1' }}</span>
+						<span class="rating-count">({{ getReviewsCount(product) }})</span>
 					</div>
-					<div *ngIf="!product.image" class="product-image placeholder">
-						📦
-					</div>
-					<div class="product-info">
-						<h3>{{ product.name }}</h3>
-						<p class="seller">Продавец: {{ product.seller_name }}</p>
-						<div class="stars" [attr.aria-label]="'Рейтинг ' + (getAverageRating(product) | number: '1.1-1')">
-							<span
-								*ngFor="let star of starScale"
-								class="star"
-								[class.filled]="star <= getRoundedRating(product)"
-							>★</span>
-							<span class="rating-value">{{ getAverageRating(product) | number: '1.1-1' }}</span>
-							<span class="rating-count">({{ getReviewsCount(product) }})</span>
-						</div>
-						<p class="price">KZT{{ product.price }}</p>
-						<p class="stock">В наличии: {{ product.stock_quantity }}</p>
-						<button type="button" (click)="addToCart(product)">В корзину</button>
-					</div>
-				</article>
-			</ng-container>
+					<p class="price">KZT{{ product.price }}</p>
+					<p class="stock">В наличии: {{ product.stock_quantity }}</p>
+					<button type="button" (click)="addToCart(product)">В корзину</button>
+				</div>
+			</article>
 		</section>
 		<ng-template #noProducts>
-			<p class="no-products" *ngIf="isClicked">По вашему запросу товары не найдены.</p>
+			<p class="no-products">По вашему запросу товары не найдены.</p>
 		</ng-template>
 	</main>
 

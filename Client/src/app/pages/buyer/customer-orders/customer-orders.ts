@@ -5,10 +5,11 @@ import { ActivatedRoute } from '@angular/router';
 import { OrderItem, OrderStatus, ProductReview } from '../../../models/api.models';
 import { OrderService } from '../../../services/order/order';
 import { AuthService } from '../../../services/auth/auth';
+import { ChatWindowComponent } from '../../../components/chat-window/chat-window';
 
 @Component({
   selector: 'app-customer-orders',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ChatWindowComponent],
   templateUrl: './customer-orders.html',
   styleUrl: './customer-orders.css',
 })
@@ -19,6 +20,7 @@ export class CustomerOrders implements OnInit {
   reviewErrors: Record<number, string> = {};
   reviewSuccess: Record<number, string> = {};
   submittingReviews: Record<number, boolean> = {};
+  activeChatOrderId: number | null = null;
   dateFrom = '';
   dateTo = '';
   statusFilter: OrderStatus | '' = '';
@@ -26,7 +28,7 @@ export class CustomerOrders implements OnInit {
   errorMessage = '';
   checkoutSuccessMessage = '';
   private hasAppliedDateRange = false;
-  private currentUserId: number | null = null;
+  currentUserId: number | null = null;
 
   readonly statuses: OrderStatus[] = ['accepted', 'pending_payment', 'paid', 'delivered'];
 
@@ -131,6 +133,10 @@ export class CustomerOrders implements OnInit {
           this.submittingReviews[order.id] = false;
         },
       });
+  }
+
+  toggleChat(orderId: number): void {
+    this.activeChatOrderId = this.activeChatOrderId === orderId ? null : orderId;
   }
 
   private initializeReviewDrafts(): void {

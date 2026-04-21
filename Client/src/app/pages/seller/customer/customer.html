@@ -21,8 +21,19 @@
 					<span>Сумма: <strong>{{ customer.totalAmount | number: '1.2-2' }} KZT</strong></span>
 					<span>Первый заказ: <strong>{{ customer.firstOrderAt | date: 'dd.MM.yyyy HH:mm' }}</strong></span>
 					<span>Последний заказ: <strong>{{ customer.lastOrderAt | date: 'dd.MM.yyyy HH:mm' }}</strong></span>
+					<button type="button" class="chat-toggle-btn" (click)="toggleChat(customer.customerId)">
+						💬 {{ activeCustomerId === customer.customerId ? 'Скрыть чат' : 'Открыть чат' }}
+					</button>
 				</div>
 			</div>
+
+			<app-chat-window
+				*ngIf="activeCustomerId === customer.customerId && currentSellerId"
+				[buyerId]="customer.customerId"
+				[sellerId]="currentSellerId"
+				[currentUserId]="currentSellerId"
+				[title]="'Чат с покупателем'"
+			></app-chat-window>
 
 			<div class="orders-table-wrap">
 				<table class="orders-table">

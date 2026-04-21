@@ -108,6 +108,11 @@ button {
 	margin: 3px 0;
 }
 
+.chat-toggle-btn {
+	margin-top: 8px;
+	background: #4e87ff;
+}
+
 .error {
 	color: #b42318;
 }

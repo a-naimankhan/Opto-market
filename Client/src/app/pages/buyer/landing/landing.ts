@@ -7,25 +7,12 @@ import { Subscription } from 'rxjs';
 import { CartService } from '../../../services/cart/cart';
 import { AuthService } from '../../../services/auth/auth';
 import { FormsModule } from '@angular/forms';
-import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-landing',
   imports: [CommonModule, FormsModule],
   templateUrl: './landing.html',
   styleUrl: './landing.css',
-  animations: [
-    trigger('slideInOut', [
-      state('in', style({ transform: 'translateX(0)', opacity: 1 })),
-      state('out', style({ transform: 'translateX(-100%)', opacity: 0 })),
-      transition('out => in', [
-        animate('350ms ease-in-out')
-      ]),
-      transition('in => out', [
-        animate('350ms ease-in-out')
-      ])
-    ]),
-  ],
 })
 export class Landing implements OnInit, OnDestroy {
   readonly starScale = [1, 2, 3, 4, 5];
@@ -40,7 +27,10 @@ export class Landing implements OnInit, OnDestroy {
   isProfileOpen = false;
   orderSuccessMessage = '';
   isContactOpen = false;
-  isClicked = false;
+  isCategoriesOpen = false;
+  isFiltering = false;
+  categoriesError = '';
+  productsError = '';
   private productsSubscription?: Subscription;
   private cartSubscription?: Subscription;
   private userSubscription?: Subscription;
@@ -53,6 +43,7 @@ export class Landing implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute
   ) {}
+  
 
   ngOnInit(): void {
     this.loadCategories();
@@ -77,34 +68,57 @@ export class Landing implements OnInit, OnDestroy {
   }
 
   loadCategories(): void {
+    this.categoriesError = '';
     this.productService.getCategory().subscribe({
       next: (categories) => {
         this.categories = categories;
       },
       error: () => {
-        console.error('Failed to load categories');
+        this.categoriesError = 'Не удалось загрузить категории. Попробуйте обновить страницу.';
         this.categories = [];
       },
     });
   }
 
   filterByCategory(id: number | null): void {
+    if (this.selectedCategoryId === id) {
+      return;
+    }
     this.selectedCategoryId = id;
     this.loadProducts();
   }
 
+  selectCategoryFromMenu(id: number | null): void {
+    this.isCategoriesOpen = false;
+    this.filterByCategory(id);
+  }
+
+  toggleCategoriesMenu(): void {
+    this.isCategoriesOpen = !this.isCategoriesOpen;
+  }
+
   loadProducts(): void {
+    this.productsError = '';
+    this.isFiltering = true;
     this.productsSubscription?.unsubscribe();
 
     this.productsSubscription = this.productService.getAllProduct(this.selectedCategoryId).subscribe({
       next: (response) => {
-        if (response && response.results) {
+        if (Array.isArray(response)) {
+          this.products = response;
+        } else if (response && response.results) {
           this.products = response.results;
+        } else {
+          this.products = [];
         }
+        window.setTimeout(() => {
+          this.isFiltering = false;
+        }, 130);
       },
       error: () => {
-        console.error('Failed to load products');
+        this.productsError = 'Не удалось загрузить товары. Попробуйте обновить страницу.';
         this.products = [];
+        this.isFiltering = false;
       },
     });
   }
@@ -222,8 +236,5 @@ export class Landing implements OnInit, OnDestroy {
   closeContact(): void {
     this.isContactOpen = false;
   }
-
-  toggleProductList(): void {
-    this.isClicked = !this.isClicked;
-  }
 }
+  

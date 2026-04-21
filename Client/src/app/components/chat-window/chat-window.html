@@ -1,0 +1,30 @@
+<section class="chat-window">
+  <header class="chat-header">
+    <h4>{{ title }}</h4>
+    <span class="chat-status" [class.online]="isConnected">{{ isConnected ? 'online' : 'offline' }}</span>
+  </header>
+
+  <p class="chat-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+  <div class="chat-messages">
+    <p class="empty-state" *ngIf="!messages.length">Сообщений пока нет.</p>
+    <article
+      class="message"
+      *ngFor="let message of messages; trackBy: trackByTimestamp"
+      [class.own]="isOwnMessage(message)"
+    >
+      <p>{{ message.message }}</p>
+      <small>{{ message.timestamp | date: 'dd.MM.yyyy HH:mm' }}</small>
+    </article>
+  </div>
+
+  <div class="chat-input">
+    <input
+      type="text"
+      [(ngModel)]="draftMessage"
+      placeholder="Введите сообщение..."
+      (keydown.enter)="sendMessage()"
+    />
+    <button type="button" (click)="sendMessage()">Отправить</button>
+  </div>
+</section>
