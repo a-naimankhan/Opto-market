@@ -25,7 +25,7 @@ export class App {
   }
 
   get showBackToHomeButton(): boolean {
-    return this.currentPath !== '/' && this.currentPath !== '/buyer';
+    return this.currentPath !== '/' && this.currentPath !== '/buyer' && this.currentPath.startsWith('/seller');
   }
 
   goToHome(): void {
