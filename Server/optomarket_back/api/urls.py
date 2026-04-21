@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ProductList, ProductDetail, ProductReviewList, price_stats, welcome, register_user, user_profile, CategoryList, OrderList, OrderStatusUpdate
+from .views import ProductList, ProductDetail, ProductReviewList, price_stats, welcome, register_user, logout_user, user_profile, CategoryList, OrderList, OrderStatusUpdate
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -13,6 +13,7 @@ urlpatterns = [
     path('register/', register_user, name='register'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('logout/', logout_user, name='logout'),
     path('user/profile/', user_profile, name='user_profile'),
     path('orders/', OrderList.as_view(), name='orders'),
     path('orders/<int:pk>/status/', OrderStatusUpdate.as_view(), name='order-status-update'),

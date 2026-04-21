@@ -1,6 +1,6 @@
 from datetime import datetime
 from django.db import IntegrityError, transaction
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Count, Max, Min, Q
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.utils import timezone
@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from .serializers import CategorySerializer, ProductSerializer, OrderSerializer, ProductReviewSerializer
 from .models import UserProfile, Product, Category, Order, OrderStatusHistory, ProductReview
 
@@ -34,6 +35,22 @@ def register_user(request):
         return Response({'message': 'Пользователь зарегистрирован'}, status=status.HTTP_201_CREATED)
     except IntegrityError:
         return Response({'error': 'Пользователь с таким именем уже существует'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_user(request):
+    refresh_token = request.data.get('refresh')
+    if not refresh_token:
+        return Response({'error': 'Refresh token обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+    except TokenError:
+        return Response({'error': 'Некорректный refresh token'}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({'message': 'Выход выполнен успешно'}, status=status.HTTP_200_OK)
 
 # Профиль пользователя
 @api_view(['GET'])
@@ -71,13 +88,23 @@ class ProductList(APIView):
         return [IsAuthenticated()]
          
     def get(self, request):
-        # Показываем доступные товары всем пользователям
-        products = Product.available.annotate(
-            avg_rating=Avg('reviews__rating'),
-            reviews_count=Count('reviews', distinct=True),
-        ).order_by('-id')
+        # mine=1 -> возвращаем только товары текущего продавца (включая 0 остаток)
+        mine = request.query_params.get('mine') == '1'
+        if mine and request.user.is_authenticated:
+            products = Product.objects.filter(owner=request.user).annotate(
+                avg_rating=Avg('reviews__rating'),
+                reviews_count=Count('reviews', distinct=True),
+            ).order_by('-id')
+        else:
+            products = Product.available.annotate(
+                avg_rating=Avg('reviews__rating'),
+                reviews_count=Count('reviews', distinct=True),
+            ).order_by('-id')
 
         category_id = request.query_params.get('category')
+        if not mine:
+            # Фильтр категории только для публичного каталога
+            pass
         if category_id:
             try:
                 products = products.filter(category_id=int(category_id))
@@ -423,7 +450,30 @@ class OrderStatusUpdate(APIView):
 
 # 2. CBV для удаления/обновления
 class ProductDetail(APIView):
-    permission_classes = [IsAuthenticated]  # Требуем аутентификацию для удаления товаров
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get(self, request, pk):
+        try:
+            product = Product.objects.annotate(
+                avg_rating=Avg('reviews__rating'),
+                reviews_count=Count('reviews', distinct=True),
+            ).get(pk=pk)
+        except Product.DoesNotExist:
+            return Response({'error': 'Товар не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ProductSerializer(product, context={'request': request})
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        return self._update(request, pk, partial=False)
+
+    def patch(self, request, pk):
+        return self._update(request, pk, partial=True)
 
     def delete(self, request, pk):
         try:
@@ -436,10 +486,48 @@ class ProductDetail(APIView):
         except Product.DoesNotExist:
             return Response({'error': 'Товар не найден'}, status=status.HTTP_404_NOT_FOUND)
 
+    def _update(self, request, pk, partial):
+        try:
+            product = Product.objects.get(pk=pk)
+        except Product.DoesNotExist:
+            return Response({'error': 'Товар не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+        if product.owner != request.user:
+            return Response({'error': 'Вы можете изменять только свои товары'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = ProductSerializer(product, data=request.data, partial=partial, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(owner=request.user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 # 3. FBV: Статистика цен
 @api_view(['GET'])
 def price_stats(request):
-    return Response({"info": "Average price is 500 KZT"})
+    products = Product.available.all()
+
+    category_id = request.query_params.get('category')
+    if category_id:
+        try:
+            products = products.filter(category_id=int(category_id))
+        except (TypeError, ValueError):
+            return Response({'error': 'category должен быть числом'}, status=status.HTTP_400_BAD_REQUEST)
+
+    stats = products.aggregate(
+        avg_price=Avg('price'),
+        min_price=Min('price'),
+        max_price=Max('price'),
+        products_count=Count('id'),
+    )
+
+    return Response({
+        'category': int(category_id) if category_id else None,
+        'products_count': stats['products_count'],
+        'avg_price': stats['avg_price'],
+        'min_price': stats['min_price'],
+        'max_price': stats['max_price'],
+    })
 
 # 4. FBV: Приветствие
 @api_view(['GET'])
