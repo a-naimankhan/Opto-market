@@ -7,12 +7,25 @@ import { Subscription } from 'rxjs';
 import { CartService } from '../../../services/cart/cart';
 import { AuthService } from '../../../services/auth/auth';
 import { FormsModule } from '@angular/forms';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-landing',
   imports: [CommonModule, FormsModule],
   templateUrl: './landing.html',
   styleUrl: './landing.css',
+  animations: [
+    trigger('slideInOut', [
+      state('in', style({ transform: 'translateX(0)', opacity: 1 })),
+      state('out', style({ transform: 'translateX(-100%)', opacity: 0 })),
+      transition('out => in', [
+        animate('350ms ease-in-out')
+      ]),
+      transition('in => out', [
+        animate('350ms ease-in-out')
+      ])
+    ]),
+  ],
 })
 export class Landing implements OnInit, OnDestroy {
   readonly starScale = [1, 2, 3, 4, 5];
@@ -27,6 +40,7 @@ export class Landing implements OnInit, OnDestroy {
   isProfileOpen = false;
   orderSuccessMessage = '';
   isContactOpen = false;
+  isClicked = false;
   private productsSubscription?: Subscription;
   private cartSubscription?: Subscription;
   private userSubscription?: Subscription;
@@ -208,5 +222,8 @@ export class Landing implements OnInit, OnDestroy {
   closeContact(): void {
     this.isContactOpen = false;
   }
+
+  toggleProductList(): void {
+    this.isClicked = !this.isClicked;
+  }
 }
-  

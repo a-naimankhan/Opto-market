@@ -16,7 +16,7 @@
 
 			<button type="button" class="menu-btn">Выгодные предложения</button>
 			<button type="button" class="menu-btn" (click)="openContact()">СВЯЗАТЬСЯ</button>
-			
+
 			<button type="button" class="icon-btn cart-btn" aria-label="Cart" (click)="openCartSidebar()">
 				К
 				<span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
@@ -61,8 +61,8 @@
 			<button
 				type="button"
 				class="filter-btn"
-				[class.active]="selectedCategoryId === null"
-				(click)="filterByCategory(null)"
+				[class.active]="isClicked"
+				(click)="toggleProductList()"
 			>Все товары</button>
 			<button
 				type="button"
@@ -73,34 +73,39 @@
 			>{{ cat.name }}</button>
 		</section>
 
-		<section class="cards-row" *ngIf="filteredProducts.length; else noProducts">
-			<article class="product-card" *ngFor="let product of filteredProducts">
-				<div *ngIf="product.image" class="product-image">
-					<img [src]="product.image" [alt]="product.name" />
-				</div>
-				<div *ngIf="!product.image" class="product-image placeholder">
-					📦
-				</div>
-				<div class="product-info">
-					<h3>{{ product.name }}</h3>
-					<p class="seller">Продавец: {{ product.seller_name }}</p>
-					<div class="stars" [attr.aria-label]="'Рейтинг ' + (getAverageRating(product) | number: '1.1-1')">
-						<span
-							*ngFor="let star of starScale"
-							class="star"
-							[class.filled]="star <= getRoundedRating(product)"
-						>★</span>
-						<span class="rating-value">{{ getAverageRating(product) | number: '1.1-1' }}</span>
-						<span class="rating-count">({{ getReviewsCount(product) }})</span>
+		<section
+			class="cards-row"
+			[@slideInOut]="isClicked ? 'in' : 'out'"
+		>
+			<ng-container *ngIf="filteredProducts.length; else noProducts">
+				<article class="product-card" *ngFor="let product of filteredProducts">
+					<div *ngIf="product.image" class="product-image">
+						<img [src]="product.image" [alt]="product.name" />
 					</div>
-					<p class="price">KZT{{ product.price }}</p>
-					<p class="stock">В наличии: {{ product.stock_quantity }}</p>
-					<button type="button" (click)="addToCart(product)">В корзину</button>
-				</div>
-			</article>
+					<div *ngIf="!product.image" class="product-image placeholder">
+						📦
+					</div>
+					<div class="product-info">
+						<h3>{{ product.name }}</h3>
+						<p class="seller">Продавец: {{ product.seller_name }}</p>
+						<div class="stars" [attr.aria-label]="'Рейтинг ' + (getAverageRating(product) | number: '1.1-1')">
+							<span
+								*ngFor="let star of starScale"
+								class="star"
+								[class.filled]="star <= getRoundedRating(product)"
+							>★</span>
+							<span class="rating-value">{{ getAverageRating(product) | number: '1.1-1' }}</span>
+							<span class="rating-count">({{ getReviewsCount(product) }})</span>
+						</div>
+						<p class="price">KZT{{ product.price }}</p>
+						<p class="stock">В наличии: {{ product.stock_quantity }}</p>
+						<button type="button" (click)="addToCart(product)">В корзину</button>
+					</div>
+				</article>
+			</ng-container>
 		</section>
 		<ng-template #noProducts>
-			<p class="no-products">По вашему запросу товары не найдены.</p>
+			<p class="no-products" *ngIf="isClicked">По вашему запросу товары не найдены.</p>
 		</ng-template>
 	</main>
 

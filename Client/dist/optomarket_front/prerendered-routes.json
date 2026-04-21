@@ -1,0 +1,17 @@
+{
+  "routes": {
+    "/": {},
+    "/buyer": {},
+    "/buyer/cart": {},
+    "/buyer/category-products": {},
+    "/buyer/checkout": {},
+    "/buyer/orders": {},
+    "/login": {},
+    "/seller": {},
+    "/seller/cart": {},
+    "/seller/categories": {},
+    "/seller/customer": {},
+    "/seller/order": {},
+    "/seller/products": {}
+  }
+}
