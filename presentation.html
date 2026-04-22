@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Optomarket – Project Presentation</title>
+<style>
+  /* ── Base ─────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+  :root {
+    --green:   #22c55e;
+    --green-d: #16a34a;
+    --blue:    #3b82f6;
+    --blue-d:  #2563eb;
+    --orange:  #f97316;
+    --purple:  #8b5cf6;
+    --dark:    #0f172a;
+    --card:    #1e293b;
+    --muted:   #94a3b8;
+    --text:    #e2e8f0;
+    --white:   #ffffff;
+  }
+
+  body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background: #0a0f1a;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  /* ── Slide shell ──────────────────────────── */
+  .slide {
+    width: 297mm;
+    min-height: 210mm;
+    padding: 14mm 16mm 12mm;
+    background: var(--dark);
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+  }
+
+  /* Background accent blobs */
+  .slide::before {
+    content: '';
+    position: absolute;
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(34,197,94,.18) 0%, transparent 70%);
+    top: -120px; right: -80px;
+    pointer-events: none;
+  }
+  .slide::after {
+    content: '';
+    position: absolute;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59,130,246,.15) 0%, transparent 70%);
+    bottom: -100px; left: -60px;
+    pointer-events: none;
+  }
+
+  /* ── Decorative top bar ───────────────────── */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10mm;
+  }
+  .logo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--green); }
+  .slide-num {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ── Slide titles ─────────────────────────── */
+  .slide-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 6mm;
+    line-height: 1.2;
+  }
+  .slide-subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 9mm;
+  }
+
+  /* ── Tag / badge ──────────────────────────── */
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 4mm;
+  }
+  .tag-green  { background: rgba(34,197,94,.18);  color: var(--green); }
+  .tag-blue   { background: rgba(59,130,246,.18); color: var(--blue); }
+  .tag-orange { background: rgba(249,115,22,.18); color: var(--orange); }
+  .tag-purple { background: rgba(139,92,246,.18); color: var(--purple); }
+
+  /* ── Grid helpers ─────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6mm; }
+
+  /* ── Cards ────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 5mm 6mm;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 3mm;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-title .icon {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .icon-green  { background: rgba(34,197,94,.2);  color: var(--green); }
+  .icon-blue   { background: rgba(59,130,246,.2); color: var(--blue); }
+  .icon-orange { background: rgba(249,115,22,.2); color: var(--orange); }
+  .icon-purple { background: rgba(139,92,246,.2); color: var(--purple); }
+
+  ul.check { list-style: none; padding: 0; }
+  ul.check li {
+    font-size: 11px;
+    color: var(--text);
+    padding: 1.5px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+  ul.check li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--green);
+    font-weight: 700;
+    font-size: 10px;
+  }
+  ul.check li.muted { color: var(--muted); }
+  ul.check li strong { color: var(--white); font-weight: 600; }
+
+  /* ── Pill row ─────────────────────────────── */
+  .pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3mm; }
+  .pill {
+    font-size: 9.5px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.12);
+    color: var(--muted);
+  }
+
+  /* ── Big stat ─────────────────────────────── */
+  .stat-row { display: flex; gap: 5mm; margin-bottom: 7mm; }
+  .stat {
+    flex: 1;
+    background: var(--card);
+    border-radius: 10px;
+    padding: 4mm 5mm;
+    border: 1px solid rgba(255,255,255,.06);
+    text-align: center;
+  }
+  .stat-num {
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Divider ──────────────────────────────── */
+  .divider {
+    height: 1px;
+    background: rgba(255,255,255,.07);
+    margin: 6mm 0;
+  }
+
+  /* ── Tech stack row ──────────────────────── */
+  .tech-row { display: flex; align-items: center; gap: 4mm; flex-wrap: wrap; margin-top: 8mm; }
+  .tech-badge {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 6px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+  }
+
+  /* ── Requirement table ────────────────────── */
+  .req-table { width: 100%; border-collapse: collapse; font-size: 10.5px; margin-top: 3mm; }
+  .req-table th {
+    background: rgba(255,255,255,.05);
+    color: var(--muted);
+    font-weight: 600;
+    text-align: left;
+    padding: 4px 8px;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    font-size: 9px;
+  }
+  .req-table td {
+    padding: 4px 8px;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+  }
+  .req-table tr:last-child td { border-bottom: none; }
+  .check-mark { color: var(--green); font-weight: 700; }
+  .pill-sm {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(34,197,94,.15);
+    color: var(--green);
+    margin-left: 4px;
+  }
+  .pill-sm.blue { background: rgba(59,130,246,.15); color: var(--blue); }
+
+  /* ── Architecture box ─────────────────────── */
+  .arch-box {
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 10px;
+    padding: 4mm 6mm;
+    font-size: 10.5px;
+  }
+  .arch-layer {
+    display: flex;
+    align-items: center;
+    gap: 3mm;
+    padding: 2.5mm 0;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+  }
+  .arch-layer:last-child { border-bottom: none; }
+  .arch-label {
+    width: 95px;
+    font-weight: 700;
+    font-size: 10px;
+    flex-shrink: 0;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .8px;
+  }
+  .arch-content { flex: 1; }
+  .arch-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  /* ── Print ────────────────────────────────── */
+  @media print {
+    body { background: var(--dark); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .slide { page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 1 — Project Overview
+════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="logo">opto<span>market</span></div>
+    <div class="slide-num">01 / 04</div>
+  </div>
+
+  <div class="tag tag-green">Web Development Team Project</div>
+  <h1 class="slide-title">B2B Wholesale Marketplace<br/>for Agricultural Products</h1>
+  <p class="slide-subtitle">A full-stack platform connecting farmers (sellers) with bulk buyers, built with <strong style="color:#fff">Angular 17</strong> on the front end and <strong style="color:#fff">Django REST Framework</strong> on the back end.</p>
+
+  <div class="stat-row">
+    <div class="stat"><div class="stat-num" style="color:var(--green)">6</div><div class="stat-label">Django Models</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--blue)">13+</div><div class="stat-label">Named Routes</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--orange)">7</div><div class="stat-label">API Endpoints</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--purple)">2</div><div class="stat-label">User Roles</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><div class="icon icon-green">🧑‍🌾</div> Seller Panel</div>
+      <ul class="check">
+        <li>Create / edit / delete products with images</li>
+        <li>Set regular price &amp; discount price (special offers)</li>
+        <li>View incoming orders, update order status</li>
+        <li>Browse customer list &amp; order history</li>
+        <li>Read product reviews with star ratings</li>
+        <li>Manage product categories</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="icon icon-blue">🛒</div> Buyer Panel</div>
+      <ul class="check">
+        <li>Browse product catalogue with category filters</li>
+        <li>Filter by "Special Offers" (discounted items)</li>
+        <li>See original price vs. discounted price</li>
+        <li>Add to cart, adjust quantities, checkout</li>
+        <li>Track own orders &amp; statuses</li>
+        <li>Leave reviews on purchased products</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tech-row">
+    <div class="tech-badge">Angular 17 (Standalone)</div>
+    <div class="tech-badge">TypeScript</div>
+    <div class="tech-badge">Django 4</div>
+    <div class="tech-badge">Django REST Framework</div>
+    <div class="tech-badge">JWT (SimpleJWT)</div>
+    <div class="tech-badge">SQLite</div>
+    <div class="tech-badge">django-cors-headers</div>
+    <div class="tech-badge">RxJS / forkJoin</div>
+    <div class="tech-badge">CSS Grid / Flexbox</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 2 — Back-End Requirements
+════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="logo">opto<span>market</span></div>
+    <div class="slide-num">02 / 04</div>
+  </div>
+
+  <div class="tag tag-orange">Back-End Requirements — Django + DRF</div>
+  <h1 class="slide-title">All Backend Requirements Covered</h1>
+
+  <div class="grid-2" style="margin-bottom:5mm">
+
+    <div>
+      <div class="card" style="margin-bottom:5mm">
+        <div class="card-title"><div class="icon icon-orange">🗂</div> Models (≥4 required — 6 implemented)</div>
+        <ul class="check">
+          <li><strong>UserProfile</strong> — extends User with role (buyer/seller)</li>
+          <li><strong>Product</strong> — name, price, discount_price, description,<br/>image, stock_quantity, category (FK), owner (FK)</li>
+          <li><strong>Category</strong> — name (unique)</li>
+          <li><strong>Order</strong> — customer (FK), product (FK), status, total_price,<br/>delivery &amp; payment method, recipient info</li>
+          <li><strong>ProductReview</strong> — product (FK), user (FK), rating, comment</li>
+          <li><strong>OrderStatusHistory</strong> — audit trail of status changes</li>
+          <li class="muted">ForeignKey ①: Product → Category &nbsp;|&nbsp; ForeignKey ②: Product → User</li>
+          <li class="muted">ForeignKey ③: Order → User &nbsp;|&nbsp; ForeignKey ④: Order → Product</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="icon icon-orange">🔑</div> Custom Model Manager</div>
+        <ul class="check">
+          <li><strong>AvailableProductManager</strong> — filters queryset to only products with stock_quantity &gt; 0</li>
+          <li>Used on the public catalogue endpoint (buyers see only in-stock items)</li>
+          <li>Seller's own "my products" view uses the default manager (sees all)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:5mm">
+        <div class="card-title"><div class="icon icon-purple">📦</div> Serializers</div>
+        <ul class="check">
+          <li><strong>ModelSerializer ①</strong> ProductSerializer (all fields, read-only owner)</li>
+          <li><strong>ModelSerializer ②</strong> OrderSerializer (nested ProductSerializer)</li>
+          <li><strong>ModelSerializer ③</strong> CategorySerializer</li>
+          <li><strong>ModelSerializer ④</strong> ProductReviewSerializer (username via source)</li>
+          <li><strong>Serializer ①</strong> LoginSerializer (plain, write-only password)</li>
+          <li><strong>Serializer ②</strong> OrderSummarySerializer (stats response)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="icon icon-blue">🌐</div> Views &amp; Authentication</div>
+        <ul class="check">
+          <li><strong>CBV (APIView) ①</strong> ProductList — GET/POST (full CRUD entry)</li>
+          <li><strong>CBV (APIView) ②</strong> ProductDetail — GET/PATCH/DELETE</li>
+          <li><strong>CBV (APIView) ③</strong> CategoryList / CategoryDetail</li>
+          <li><strong>CBV (APIView) ④</strong> OrderList — GET seller orders / POST new</li>
+          <li><strong>CBV (APIView) ⑤</strong> OrderStatusUpdate, ProductReviewList</li>
+          <li><strong>FBV ①</strong> register_user — @api_view POST, AllowAny</li>
+          <li><strong>FBV ②</strong> logout_user — @api_view POST, token blacklist</li>
+          <li><strong>FBV ③</strong> user_profile — @api_view GET</li>
+          <li><strong>FBV ④</strong> price_stats — @api_view GET (Avg/Min/Max)</li>
+          <li>JWT: TokenObtainPairView + TokenRefreshView + blacklist on logout</li>
+          <li>CORS: django-cors-headers, CORS_ALLOW_ALL_ORIGINS = True</li>
+          <li>owner=request.user on Product.save(); customer=request.user on Order</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 3 — Front-End Requirements
+════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="logo">opto<span>market</span></div>
+    <div class="slide-num">03 / 04</div>
+  </div>
+
+  <div class="tag tag-blue">Front-End Requirements — Angular 17</div>
+  <h1 class="slide-title">All Angular Requirements Covered</h1>
+
+  <div class="grid-2">
+
+    <div>
+      <div class="card" style="margin-bottom:5mm">
+        <div class="card-title"><div class="icon icon-blue">🔀</div> Routing — 13 Named Routes (≥3 required)</div>
+        <ul class="check">
+          <li><strong>/</strong> &amp; <strong>/buyer</strong> — public product catalogue (Landing)</li>
+          <li><strong>/login</strong> — JWT login page</li>
+          <li><strong>/buyer/cart</strong> — cart (guarded: buyerAuthGuard)</li>
+          <li><strong>/buyer/orders</strong> — order history</li>
+          <li><strong>/buyer/checkout</strong> — checkout form</li>
+          <li><strong>/seller/products</strong> — CRUD product management</li>
+          <li><strong>/seller/categories</strong> — category management</li>
+          <li><strong>/seller/order</strong> — incoming orders</li>
+          <li><strong>/seller/customer</strong> — customer list</li>
+          <li><strong>/seller/reviews</strong> — seller reads product reviews</li>
+          <li>Route guards: sellerAuthGuard + buyerAuthGuard</li>
+        </ul>
+      </div>
+      <div class="card" style="margin-bottom:5mm">
+        <div class="card-title"><div class="icon icon-green">🔒</div> JWT Authentication</div>
+        <ul class="check">
+          <li><strong>HTTP Interceptor</strong> (auth-interceptor.ts) — clones every outgoing request and sets <code>Authorization: Bearer &lt;token&gt;</code> header from localStorage</li>
+          <li>Login page collects username + password, calls /api/token/, stores access &amp; refresh tokens</li>
+          <li>Logout calls /api/logout/ (blacklists refresh token) then clears localStorage</li>
+          <li>Role-based routing: seller → /seller panel, buyer → / catalogue</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="icon icon-purple">⚠️</div> Error Handling</div>
+        <ul class="check">
+          <li>All HTTP calls use .subscribe({ error: … }) to catch failures</li>
+          <li>Error messages shown in template via *ngIf / @if on error string</li>
+          <li>Discount validation: warns if discount ≥ regular price</li>
+          <li>Form validation prevents empty required fields before API call</li>
+        </ul>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:5mm">
+        <div class="card-title"><div class="icon icon-orange">🖱</div> Click Events triggering API (≥4 required)</div>
+        <ul class="check">
+          <li><strong>(click) ①</strong> Save product → POST/PATCH /api/products/</li>
+          <li><strong>(click) ②</strong> Delete product → DELETE /api/products/:id/</li>
+          <li><strong>(click) ③</strong> Filter by category → GET /api/products/?category=n</li>
+          <li><strong>(click) ④</strong> Place order (checkout) → POST /api/orders/</li>
+          <li><strong>(click) ⑤</strong> Update order status → PATCH /api/orders/:id/status/</li>
+          <li><strong>(click) ⑥</strong> Clear discount → PATCH /api/products/:id/ (discount_price: null)</li>
+          <li><strong>(click) ⑦</strong> Submit review → POST /api/products/:id/reviews/</li>
+        </ul>
+      </div>
+      <div class="card" style="margin-bottom:5mm">
+        <div class="card-title"><div class="icon icon-blue">📝</div> Form Controls ([(ngModel)]) — ≥4 required</div>
+        <ul class="check">
+          <li><strong>ngModel ①</strong> Login: username field</li>
+          <li><strong>ngModel ②</strong> Login: password field</li>
+          <li><strong>ngModel ③</strong> Product form: name, price, discount_price, description, category, unit, min_quantity, stock_quantity, seller_name, seller_phone</li>
+          <li><strong>ngModel ④</strong> Checkout form: firstName, lastName, phone, email, delivery method, payment method, recipient fields</li>
+          <li><strong>ngModel ⑤</strong> Review form: rating, comment</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="icon icon-green">🔁</div> @for / @if — Angular 17+ Control Flow</div>
+        <ul class="check">
+          <li><strong>@for</strong> — product card list, order list, review list, category buttons, cart items, status history logs</li>
+          <li><strong>@if</strong> — discount price block, empty-state messages, loading spinners, seller/buyer conditional UI, form error messages, recipient section toggle</li>
+          <li>Services: <strong>ProductService</strong>, <strong>AuthService</strong>, <strong>OrderService</strong>, <strong>CartService</strong> — all inject HttpClient</li>
+          <li>Interfaces: Product, Category, Order, ProductReview, CartItem in api.models.ts</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 4 — Architecture & Summary
+════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="top-bar">
+    <div class="logo">opto<span>market</span></div>
+    <div class="slide-num">04 / 04</div>
+  </div>
+
+  <div class="tag tag-purple">Architecture &amp; Delivery Summary</div>
+  <h1 class="slide-title">System Architecture &amp; What Was Delivered</h1>
+
+  <div class="grid-2">
+    <div>
+      <div class="card" style="margin-bottom:5mm">
+        <div class="card-title"><div class="icon icon-purple">🏗</div> Architecture Overview</div>
+        <div class="arch-box" style="margin-top:3mm">
+          <div class="arch-layer">
+            <div class="arch-dot" style="background:var(--blue)"></div>
+            <div class="arch-label">Browser</div>
+            <div class="arch-content">Angular 17 SPA — standalone components, lazy routing, JWT stored in localStorage</div>
+          </div>
+          <div class="arch-layer">
+            <div class="arch-dot" style="background:var(--green)"></div>
+            <div class="arch-label">Interceptor</div>
+            <div class="arch-content">authInterceptor — injects <code>Authorization: Bearer</code> into every outgoing HttpClient request</div>
+          </div>
+          <div class="arch-layer">
+            <div class="arch-dot" style="background:var(--orange)"></div>
+            <div class="arch-label">API (DRF)</div>
+            <div class="arch-content">Django REST Framework — FBVs + CBVs, SimpleJWT, token blacklist, CORS</div>
+          </div>
+          <div class="arch-layer">
+            <div class="arch-dot" style="background:var(--purple)"></div>
+            <div class="arch-label">Database</div>
+            <div class="arch-content">SQLite via Django ORM — 15 migrations applied, custom model manager, 6 models</div>
+          </div>
+          <div class="arch-layer">
+            <div class="arch-dot" style="background:var(--muted)"></div>
+            <div class="arch-label">Media</div>
+            <div class="arch-content">Product images served from /media/ via Django MEDIA_ROOT / MEDIA_URL</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="icon icon-green">✅</div> Requirement Checklist — Backend</div>
+        <table class="req-table">
+          <tr><th>Requirement</th><th>Status</th></tr>
+          <tr><td>≥ 4 models</td><td><span class="check-mark">✓</span> 6 models</td></tr>
+          <tr><td>1 custom model manager</td><td><span class="check-mark">✓</span> AvailableProductManager</td></tr>
+          <tr><td>≥ 2 ForeignKey relationships</td><td><span class="check-mark">✓</span> 5 FK relations</td></tr>
+          <tr><td>≥ 2 serializers.Serializer</td><td><span class="check-mark">✓</span> LoginSerializer, OrderSummarySerializer</td></tr>
+          <tr><td>≥ 2 serializers.ModelSerializer</td><td><span class="check-mark">✓</span> 4 ModelSerializers</td></tr>
+          <tr><td>≥ 2 FBV with @api_view</td><td><span class="check-mark">✓</span> 4 FBVs</td></tr>
+          <tr><td>≥ 2 CBV using APIView</td><td><span class="check-mark">✓</span> 6 CBVs</td></tr>
+          <tr><td>Token auth (login + logout)</td><td><span class="check-mark">✓</span> SimpleJWT + blacklist</td></tr>
+          <tr><td>Full CRUD for ≥ 1 model</td><td><span class="check-mark">✓</span> Product: GET/POST/PATCH/DELETE</td></tr>
+          <tr><td>Link objects to request.user</td><td><span class="check-mark">✓</span> Product.owner, Order.customer</td></tr>
+          <tr><td>CORS configured</td><td><span class="check-mark">✓</span> django-cors-headers</td></tr>
+          <tr><td>Postman collection</td><td><span class="check-mark">✓</span> Committed to repo</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:5mm">
+        <div class="card-title"><div class="icon icon-blue">✅</div> Requirement Checklist — Frontend</div>
+        <table class="req-table">
+          <tr><th>Requirement</th><th>Status</th></tr>
+          <tr><td>Interfaces &amp; services for API</td><td><span class="check-mark">✓</span> api.models.ts + 4 services</td></tr>
+          <tr><td>≥ 4 click events → API</td><td><span class="check-mark">✓</span> 7 events wired</td></tr>
+          <tr><td>≥ 4 form controls [(ngModel)]</td><td><span class="check-mark">✓</span> 15+ controls across 3 forms</td></tr>
+          <tr><td>Basic CSS styling</td><td><span class="check-mark">✓</span> Per-component CSS, responsive grid</td></tr>
+          <tr><td>Routing ≥ 3 named routes</td><td><span class="check-mark">✓</span> 13 routes + guards</td></tr>
+          <tr><td>@for / @if (or *ngFor/*ngIf)</td><td><span class="check-mark">✓</span> Used throughout all list views</td></tr>
+          <tr><td>JWT auth: interceptor + login + logout</td><td><span class="check-mark">✓</span> authInterceptor + Login + AuthService</td></tr>
+          <tr><td>≥ 1 Angular Service with HttpClient</td><td><span class="check-mark">✓</span> ProductService, OrderService, AuthService, CartService</td></tr>
+          <tr><td>Handle API errors gracefully</td><td><span class="check-mark">✓</span> Error messages on all failed requests</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="icon icon-orange">🚀</div> Key Features Beyond Requirements</div>
+        <ul class="check">
+          <li>Localized price input — supports 19 Unicode digit systems (Arabic, Persian, Devanagari, etc.)</li>
+          <li>Discount / Special Offers — seller sets discount_price, buyers see strikethrough old price + red new price, "Выгодные предложения" filter</li>
+          <li>Product reviews page for seller — reads all reviews on own products with forkJoin, star display</li>
+          <li>Immediate UI updates — product delete / create / edit reflected instantly without page reload</li>
+          <li>AvailableProductManager — buyers only see in-stock items via custom DB queryset</li>
+          <li>Order status audit trail — OrderStatusHistory logs every transition with timestamp</li>
+          <li>Pagination — ProductList supports page_size query param (max 48)</li>
+          <li>Role-based route guards — sellerAuthGuard &amp; buyerAuthGuard protect dashboards</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
