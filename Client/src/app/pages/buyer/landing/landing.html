@@ -18,11 +18,13 @@
 			<button type="button" class="menu-btn" (click)="openContact()">СВЯЗАТЬСЯ</button>
 
 			<button type="button" class="icon-btn cart-btn" aria-label="Cart" (click)="openCartSidebar()">
-				<img src="assets/icons/cart.png" alt="Cart" class="cart-icon">
+				<img src="cart.png" alt="Cart" class="cart-icon" id="carticon">
 				<span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
 			</button>
 			<div class="menu-item profile-menu">
-				<button type="button" class="icon-btn" aria-label="Profile" (click)="toggleProfilePanel()">П</button>
+				<button type="button" class="icon-btn" aria-label="Profile" (click)="toggleProfilePanel()">
+					<img src="usericon.png" alt="usericon" id="usericon">
+				</button>
 				<div class="profile-dropdown" *ngIf="isProfileOpen">
 					<div *ngIf="currentUser; else guestProfile" class="profile-content">
 						<p><strong>{{ currentUser.username }}</strong></p>
