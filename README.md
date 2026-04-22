@@ -149,22 +149,33 @@ The landing page serves as the main product catalog for buyers.
  
 ## 🚀 Getting Started
  
-### Backend
- 
+### Start Everything With Docker
+
+```bash
+docker compose up --build
+```
+
+This starts both services together:
+
+- Frontend: `http://localhost:4200`
+- Backend API: `http://localhost:8000/api/`
+
+The backend runs migrations automatically on startup. The Angular container proxies `/api` and `/media` requests to Django, so the frontend and backend work together from a single `docker compose up --build` command.
+
+### Backend Without Docker
+
 ```bash
 cd Server/optomarket_back
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
 ```
- 
-### Frontend
- 
+
+### Frontend Without Docker
+
 ```bash
 cd Client
 npm install
-ng serve
+npm start
 ```
- 
-The Angular app runs on `http://localhost:4200` and connects to the Django backend at `http://127.0.0.1:8000`.
  

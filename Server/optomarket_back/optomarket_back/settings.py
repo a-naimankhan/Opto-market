@@ -2,6 +2,20 @@ from pathlib import Path
 from datetime import timedelta
 import os
 
+
+def env_flag(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.lower() in {"1", "true", "yes", "on"}
+
+
+def env_list(name, default=None):
+    value = os.getenv(name)
+    if not value:
+        return default or []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -26,18 +40,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-pl#99rcn)+@x9wb55zfpgcm-!v8bbojp-4%vi-l@_ezz7^85qw"
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-pl#99rcn)+@x9wb55zfpgcm-!v8bbojp-4%vi-l@_ezz7^85qw")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env_flag("DEBUG", True)
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", ['127.0.0.1', 'localhost', 'server'])
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4200",
-    "http://127.0.0.1:4200",
-    
-]
+CORS_ALLOWED_ORIGINS = env_list(
+    "CORS_ALLOWED_ORIGINS",
+    [
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+    ],
+)
 
 # Если планируете передавать куки или специфические заголовки
 CORS_ALLOW_CREDENTIALS = True

@@ -1,20 +1,16 @@
-# Use the official Node.js image as the base image
-FROM node:22-alpine
+FROM node:22-alpine AS builder
 
-# Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
 COPY package*.json ./
+RUN npm ci
 
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the application code
 COPY . .
+RUN npm run build -- --output-mode=static --prerender=false --ssr=false
 
-# Expose the port the app runs on
-EXPOSE 4200
+FROM nginx:1.27-alpine
 
-# Command to run the application
-CMD ["node_modules/.bin/ng", "serve", "optomarket_front", "--host", "0.0.0.0", "--port", "4200"]
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/dist/optomarket_front/browser /usr/share/nginx/html
+
+EXPOSE 80
