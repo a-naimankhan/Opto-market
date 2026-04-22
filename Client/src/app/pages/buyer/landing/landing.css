@@ -77,6 +77,22 @@
 	position: relative;
 }
 
+#usericon{
+	height: 24px;
+	width: 24px;
+	position: absolute;
+	left: 3.5px;
+	bottom: 5px;
+}
+
+#carticon{
+	height: 24px;
+	width: 24px;
+	position: absolute;
+	left: 3px;
+	bottom: 2px;
+}
+
 .cart-badge {
 	position: absolute;
 	top: -7px;
@@ -117,6 +133,7 @@
 	padding: 8px 14px;
 	font-size: 15px;
 	color: #4b4b4b;
+	cursor: pointer;
 }
 
 .dropdown li:hover {
