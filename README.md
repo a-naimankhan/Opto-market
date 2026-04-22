@@ -8,7 +8,7 @@ OptoMarket is a two-sided wholesale marketplace for agricultural goods. Buyers c
  
 ## Naimankhan Aibar
 ## Muratov Nurali
-   Baltabay Akniyet
+   Baltabek Akniyet
 ---
  
 ## 🛠️ Tech Stack
